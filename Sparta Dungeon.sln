@@ -1,9 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sparta Dungeon", "Sparta Dungeon\Sparta Dungeon.csproj", "{5AD95F54-650B-4BE4-AD45-0D4BD2A91D90}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Item,Player", "OtherSceneManager\Item,Player.csproj", "{8058AA29-9B19-44A3-A399-10F9DC2E6F06}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OtherScene", "SpartaDungeon(2)\OtherScene.csproj", "{B3A81843-ACF2-4895-892C-BC68B01D9781}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "trashCan", "trashCan\trashCan.csproj", "{490847AA-34B6-4106-8239-811D45B1B594}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpartaDungeon(2)", "SpartaDungeon(30\SpartaDungeon(2).csproj", "{554E88C9-62A9-4858-8D59-763C5CCD0BFB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +23,22 @@ Global
 		{5AD95F54-650B-4BE4-AD45-0D4BD2A91D90}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5AD95F54-650B-4BE4-AD45-0D4BD2A91D90}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5AD95F54-650B-4BE4-AD45-0D4BD2A91D90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8058AA29-9B19-44A3-A399-10F9DC2E6F06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8058AA29-9B19-44A3-A399-10F9DC2E6F06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8058AA29-9B19-44A3-A399-10F9DC2E6F06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8058AA29-9B19-44A3-A399-10F9DC2E6F06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3A81843-ACF2-4895-892C-BC68B01D9781}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3A81843-ACF2-4895-892C-BC68B01D9781}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3A81843-ACF2-4895-892C-BC68B01D9781}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3A81843-ACF2-4895-892C-BC68B01D9781}.Release|Any CPU.Build.0 = Release|Any CPU
+		{490847AA-34B6-4106-8239-811D45B1B594}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{490847AA-34B6-4106-8239-811D45B1B594}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{490847AA-34B6-4106-8239-811D45B1B594}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{490847AA-34B6-4106-8239-811D45B1B594}.Release|Any CPU.Build.0 = Release|Any CPU
+		{554E88C9-62A9-4858-8D59-763C5CCD0BFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{554E88C9-62A9-4858-8D59-763C5CCD0BFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{554E88C9-62A9-4858-8D59-763C5CCD0BFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{554E88C9-62A9-4858-8D59-763C5CCD0BFB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
