@@ -40,10 +40,7 @@ namespace ItemPlayer
 
     public interface IPotion : IItem
     {
-        public void UseItem()
-        {
-            //사용 가능
-        }
+        public void UseItem(Player player, IPotion item, Inventory inventory);
     }
 
     public class HealingPotion : IPotion
@@ -55,11 +52,12 @@ namespace ItemPlayer
         public string Name { get { return "치유물약"; } }
         public string Description { get { return "마시면 체력 20이 회복된다."; } }
 
-        public void UseItem(Player player)
-        {
-            player.Health += 20; 
-        }
 
+        public void UseItem(Player player, IPotion item, Inventory inventory)
+        {
+            player.Health += 20;
+            inventory.InventoryItem.Remove(item);   
+        }
         public void Buyable()
         {
             //구매 가능
@@ -78,10 +76,7 @@ namespace ItemPlayer
 
     public interface IEquipment : IItem
     {
-        public void Equip()
-        {
-            //장착하기
-        }
+        public void EquipOrUnEquip(Player player, IEquipment item, Inventory inventory);
     }
 
     public abstract class Weapon : IEquipment
@@ -110,6 +105,7 @@ namespace ItemPlayer
                 else
                 {
                     Console.WriteLine("이미 착용한 부위입니다");
+                    Thread.Sleep(1000);
                 }
             }
             else
@@ -193,6 +189,35 @@ namespace ItemPlayer
         public abstract int Price { get; }
         public abstract string Name { get; }
         public abstract string Description { get; }
+
+        public EquipmentSlot Slot = EquipmentSlot.body;
+
+        public void EquipOrUnEquip(Player player, IEquipment item, Inventory inventory)
+        {
+            //착용하고 있는 아이템인지 검사
+            if (!inventory.EquippedItem.Contains(item))
+            {
+                //착용 부위인지 검사
+                if (!player.equippingSlot.ContainsValue(Slot))
+                {
+                    player.Defense += ArmorDefense;
+                    player.equippingSlot.Add(item.Name, Slot);
+                    inventory.EquippedItem.Add(item);
+                }
+                else
+                {
+                    Console.WriteLine("이미 착용한 부위입니다");
+                    Thread.Sleep(1000);
+                }
+            }
+            else
+            {
+                //착용 해제하기
+                player.Defense -= ArmorDefense;
+                player.equippingSlot.Remove(item.Name);
+                inventory.EquippedItem.Remove(item);
+            }
+        }
     }
 
 
@@ -267,6 +292,7 @@ namespace ItemPlayer
     {
         public List<IItem> InventoryItem = new List<IItem> { };
         public List<IEquipment> EquippedItem = new List<IEquipment> { };
+
         Shop shop = new Shop();
 
         //// 아이템관리 //
@@ -728,16 +754,16 @@ namespace GameLoop
                             buyer.Add(seller[input - 1]);
                             seller.RemoveAt(input - 1);
 
-                            Thread.Sleep(10);
+                            Thread.Sleep(100);
                             if (isBuying == true)
                             {
-                                PrintText($"{tempItemName} 구매에 성공했습니다!", ConsoleColor.Green);
+                                PrintText($"{tempItemName} 구매에 성공했습니다!", ConsoleColor.DarkGreen);
                             }
                             else
                             {
-                                PrintText($"{tempItemName} 판매에 성공했습니다!", ConsoleColor.Green);
+                                PrintText($"{tempItemName} 판매에 성공했습니다!", ConsoleColor.DarkGreen);
                             }
-                            Thread.Sleep(100);
+                            Thread.Sleep(200);
 
                             inputSuccess = true;
                         }
@@ -846,18 +872,65 @@ namespace GameLoop
             engage.AddRange(new List<string> { "장착 관리" });
             connectedScene.AddRange(new List<string> { "돌아가기" });
 
-            engageMethod.Add(ManageEquipping);
-            engageMethod.Add(UseItem);
+            engageMethod.Add(ManageEquipAndUse);
         }
 
-        public void ManageEquipping(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
+        public void ManageEquipAndUse(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
         {
+            bool inputSuccess = false;
+            int inputEngage; 
 
+            while (!inputSuccess)
+            {
+                Console.Clear();
+                ShowItem(inventory);
+                if (int.TryParse(Console.ReadLine(), out inputEngage))
+                {
+                    if (inputEngage == inventory.InventoryItem.Count + 1)
+                    {
+                        //돌아가기
+                        inputSuccess = true;
+                        break;
+                    }
+                    else if (inputEngage < inventory.InventoryItem.Count + 1 && inputEngage > 0)
+                    {
+                        if(inventory.InventoryItem[inputEngage - 1] is IEquipment)
+                        {
+                            IEquipment temp = inventory.InventoryItem[inputEngage - 1] as IEquipment;
+                            temp.EquipOrUnEquip( player, temp,  inventory); //손봐야함
+                        }
+                        else if(inventory.InventoryItem[inputEngage - 1] is IPotion)
+                        {
+                            IPotion temp = inventory.InventoryItem[inputEngage - 1] as IPotion;
+                            temp.UseItem(player, temp, inventory);
+                        }
+                    }
+                }
+            }
         }
-        public void UseItem(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
+        public void ShowItem(Inventory inventory)
         {
+            int i = 0;
+            Console.WriteLine();
+
+            foreach (IItem item in inventory.InventoryItem)
+            {
+                if (inventory.EquippedItem.Contains(item))
+                {
+                    PrintText($"[{i + 1}]\t[E]{item.Name}\t|\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t|  가격: {item.Price}골드", ConsoleColor.Green);
+                    i++;
+                }
+                else
+                {
+                    Console.WriteLine($"[{i + 1}]\t[ ]{item.Name}\t|\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t|  가격: {item.Price}골드");
+                    i++;
+                }
+            }
+            Console.WriteLine($"\n{i + 1} 돌아가기");
+            Console.WriteLine();
 
         }
+
     }
 
     public class CharacterScene : UIScene
