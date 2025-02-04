@@ -221,7 +221,7 @@ namespace GameLoop
 
         SceneManager SM = new SceneManager();
 
-        Scene currentScene = new DungeonScene();
+        Scene currentScene = new TownScene();
 
         ClassGroup classGroup = new Warrior();
 
@@ -246,10 +246,10 @@ namespace GameLoop
         {
             Player player = new Player(1, "Rtani", classGroup);
 
-            SM.EnterScene += currentScene.ShowDescription;
-            SM.EnterScene += currentScene.ShowChoice;
+            //SM.EnterScene += currentScene.ShowDescription;
+            //SM.EnterScene += currentScene.ShowChoice;
 
-            SM.EnterCharacterUIScene += currentScene.ShowInfo;
+            //SM.EnterCharacterUIScene += currentScene.ShowInfo;
 
             while (isRunning)
             {
@@ -309,22 +309,22 @@ namespace GameLoop
                 switch (ToSceneName)
                 {
 
-                    case "TownScene":
+                    case "마을":
                         currentScene = new TownScene();
                         break;
-                    case "CharacterScene":
+                    case "캐릭터 정보창":
                         currentScene = new CharacterScene(currentScene, ref tempForUI);
                         break;
-                    case "InventoryScene":
+                    case "장비창":
                         currentScene = new InventoryScene(currentScene, ref tempForUI);
                         break;
-                    case "ShopScene":
+                    case "상점":
                         currentScene = new ShopScene();
                         break;
-                    case "RestScene":
+                    case "여관":
                         currentScene = new RestScene();
                         break;
-                    case "DungeonScene":
+                    case "던전":
                         currentScene = new DungeonScene();
                         break;
                 }
@@ -382,7 +382,7 @@ namespace GameLoop
 
             while (i - sceneName.engage.Count - 1 < sceneName.connectedScene.Count)
             {
-                Console.WriteLine($"{i}. {sceneName.connectedScene[i - sceneName.engage.Count - 1]} 로 이동하기");
+                Console.WriteLine($"{i}. {sceneName.connectedScene[i - sceneName.engage.Count - 1]} (으)로 이동하기");
                 i++;
             }
             Console.WriteLine();
@@ -413,7 +413,7 @@ namespace GameLoop
             name = "마을";
             description = "이곳은 마을입니다. 무기를 정비하고 휴식을 취할 수 있습니다.";
             engage.AddRange(new List<string> { "하늘 보기", "마을 순찰" });
-            connectedScene.AddRange(new List<string> { "RestScene", "ShopScene", "DungeonScene", "CharacterScene", "InventoryScene" });
+            connectedScene.AddRange(new List<string> { "여관", "상점", "던전", "캐릭터 정보창", "장비창" });
         }
     }
 
@@ -424,7 +424,7 @@ namespace GameLoop
             name = "여관";
             description = "여관에 들어왔습니다. 휴식을 취하거나 식사를 할 수 있습니다.";
             engage.AddRange(new List<string> { "휴식 하기(20G)", "식사 하기(50G)" });
-            connectedScene.AddRange(new List<string> { "TownScene", "CharacterScene", "InventoryScene" });
+            connectedScene.AddRange(new List<string> { "마을", "캐릭터 정보창", "장비창" });
         }
     }
     public class DungeonScene : LocationScene
@@ -438,7 +438,7 @@ namespace GameLoop
             name = "던전";
             description = "이곳은 던전 입구입니다. 조심하세요.";
             engage.AddRange(new List<string> { "사냥터 입장", "요새 입장", "지옥 입장" });
-            connectedScene.AddRange(new List<string> { "TownScene", "CharacterScene", "InventoryScene" });
+            connectedScene.AddRange(new List<string> { "마을", "캐릭터 정보창", "장비창" });
         }
     }
 
@@ -449,7 +449,7 @@ namespace GameLoop
             name = "상점";
             description = "이곳은 상점입니다. 물품을 구매하고 판매할 수 있습니다.";
             engage.AddRange(new List<string> { "물품 구매", "물품 판매" });
-            connectedScene.AddRange(new List<string>() { "TownScene", "CharacterScene", "InventoryScene" });
+            connectedScene.AddRange(new List<string>() { "마을", "캐릭터 정보창", "장비창" });
         }
     }
 
