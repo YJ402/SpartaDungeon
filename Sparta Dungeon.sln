@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpartaDungeon(Act)", "Spart
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpartaDungeon(store)", "SpartaDungeon\SpartaDungeon(store).csproj", "{FCC3A321-BDA5-4442-BB80-F726EDBB82BC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpartaDungeon(EquipManage)", "SpartaDungeon(EquipManage)\SpartaDungeon(EquipManage).csproj", "{C652D004-487F-4C93-B4C9-045DD3945D6B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotePad", "NotePad\NotePad.csproj", "{939937F5-D2DA-40CF-BE66-77734F67BBF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +55,14 @@ Global
 		{FCC3A321-BDA5-4442-BB80-F726EDBB82BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCC3A321-BDA5-4442-BB80-F726EDBB82BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCC3A321-BDA5-4442-BB80-F726EDBB82BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C652D004-487F-4C93-B4C9-045DD3945D6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C652D004-487F-4C93-B4C9-045DD3945D6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C652D004-487F-4C93-B4C9-045DD3945D6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C652D004-487F-4C93-B4C9-045DD3945D6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{939937F5-D2DA-40CF-BE66-77734F67BBF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{939937F5-D2DA-40CF-BE66-77734F67BBF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{939937F5-D2DA-40CF-BE66-77734F67BBF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{939937F5-D2DA-40CF-BE66-77734F67BBF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
