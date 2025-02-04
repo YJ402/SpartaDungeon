@@ -11,7 +11,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OtherScene", "SpartaDungeon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "trashCan", "trashCan\trashCan.csproj", "{490847AA-34B6-4106-8239-811D45B1B594}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpartaDungeon(2)", "SpartaDungeon(30\SpartaDungeon(2).csproj", "{554E88C9-62A9-4858-8D59-763C5CCD0BFB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpartaDungeon(SceneManager)", "SpartaDungeon(30\SpartaDungeon(SceneManager).csproj", "{554E88C9-62A9-4858-8D59-763C5CCD0BFB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpartaDungeon(Act)", "SpartaDungeon(Act)\SpartaDungeon(Act).csproj", "{2C4EB2AB-730C-4956-B5F9-2A5BD33F11CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{554E88C9-62A9-4858-8D59-763C5CCD0BFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{554E88C9-62A9-4858-8D59-763C5CCD0BFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{554E88C9-62A9-4858-8D59-763C5CCD0BFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C4EB2AB-730C-4956-B5F9-2A5BD33F11CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C4EB2AB-730C-4956-B5F9-2A5BD33F11CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C4EB2AB-730C-4956-B5F9-2A5BD33F11CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C4EB2AB-730C-4956-B5F9-2A5BD33F11CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
