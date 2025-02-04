@@ -1,6 +1,8 @@
 ﻿using ItemPlayer;
 using GameLoop;
 using System.ComponentModel;
+using System.Collections.Generic;
+using System.Numerics;
 
 namespace ItemPlayer
 {
@@ -11,6 +13,11 @@ namespace ItemPlayer
 
     public interface IItem
     {
+        float CoreValue { get; }
+        string CoreValueName { get; }
+        int Price { get; }
+        string Name { get; }
+        string Description { get; }
         public void Buyable()
         {
             //구매 가능
@@ -32,8 +39,12 @@ namespace ItemPlayer
 
     public class HealingPotion : IPotion
     {
+        public float CoreValue => healAmount;
+        public string CoreValueName { get { return "치유량"; } }
         float healAmount = 20;
-        int Price = 100;
+        public int Price { get { return 100; } }
+        public string Name { get { return "치유물약"; } }
+        public string Description { get { return "마시면 체력 20이 회복된다."; } }
 
         public void Buyable()
         {
@@ -61,10 +72,12 @@ namespace ItemPlayer
 
     public abstract class Weapon : IEquipment
     {
-        protected abstract string Name { get; }
+        public float CoreValue => WeaponAttack;
+        public string CoreValueName { get { return "공격력"; } }
         protected abstract int WeaponAttack { get; }
-        protected abstract int Price { get; }
-        protected abstract string Description { get; }
+        public abstract int Price { get; }
+        public abstract string Name { get; }
+        public abstract string Description { get; }
 
         public void Attackable()
         {
@@ -73,10 +86,10 @@ namespace ItemPlayer
     }
     public class Old_Sword : Weapon
     {
-        protected override string Name { get { return "낡은 검"; } }
+        public override string Name { get { return "낡은 검"; } }
         protected override int WeaponAttack { get { return 2; } }
-        protected override int Price { get { return 100; } }
-        protected override string Description { get { return "찔리면 파상풍에 걸릴 거 같은 검입니다."; } }
+        public override int Price { get { return 100; } }
+        public override string Description { get { return "찔리면 파상풍에 걸릴 거 같은 검입니다."; } }
 
         public void Buyable()
         {
@@ -96,10 +109,10 @@ namespace ItemPlayer
 
     public class Spartan_Spear : Weapon
     {
-        protected override string Name { get { return "스파르타의 창"; } }
+        public override string Name { get { return "스파르타의 창"; } }
         protected override int WeaponAttack { get { return 7; } }
-        protected override int Price { get { return 2000; } }
-        protected override string Description { get { return "스파르타의 전사들이 사용했다는 전설의 창입니다."; } }
+        public override int Price { get { return 2000; } }
+        public override string Description { get { return "스파르타의 전사들이 사용했다는 전설의 창입니다."; } }
 
         public void Buyable()
         {
@@ -119,19 +132,21 @@ namespace ItemPlayer
 
     public abstract class Armor : IEquipment
     {
-        protected abstract string Name { get; }
+        public float CoreValue => ArmorDefense;
+        public string CoreValueName { get { return "방어력"; } }
         protected abstract int ArmorDefense { get; }
-        protected abstract int Price { get; }
-        protected abstract string Description { get; }
+        public abstract int Price { get; }
+        public abstract string Name { get; }
+        public abstract string Description { get; }
     }
 
 
     public class Novice_Armor : Armor
     {
-        protected override string Name { get { return "수련자의 갑옷"; } }
+        public override string Name { get { return "수련자의 갑옷"; } }
         protected override int ArmorDefense { get { return 5; } }
-        protected override int Price { get { return 1000; } }
-        protected override string Description { get { return "수련에 도움을 주는 갑옷입니다."; } }
+        public override int Price { get { return 1000; } }
+        public override string Description { get { return "수련에 도움을 주는 갑옷입니다."; } }
 
         public void Buyable()
         {
@@ -173,7 +188,7 @@ namespace ItemPlayer
 
         public ClassGroup playerClass;
 
-        public int Gold { get; set; }
+        public float Gold { get; set; }
 
         public int Lv { get; set; }
 
@@ -192,13 +207,91 @@ namespace ItemPlayer
         }
     }
 
+    public class Inventory
+    {
+        public List<IItem> InventoryItem = new List<IItem> { };
+        public List<IEquipment> EquippedItem = new List<IEquipment> { };
+        Shop shop = new Shop();
+
+        // 장비관리 //
+        public void EquipItem(List<IItem> InventoryItem, List<IEquipment> EquippedItem, IEquipment item)
+        {
+            AddToEquippedItem(EquippedItem, item);
+        }
+
+        public void UnEquipItemp(List<IItem> InventoryItem, List<IEquipment> EquippedItem, IEquipment item)
+        {
+            RemoveFromEquippedItem(EquippedItem, item);
+        }
+
+        public void UseItem(List<IItem> InventoryItem, IItem item)
+        {
+            RemoveFromInventoryItem(InventoryItem, item);
+        }
+
+        // 상점 //
+        public void BuyFromShop(Player player, List<IItem> InventoryItem, IItem item)
+        {
+            AddToInventoryItem(InventoryItem, item);
+            player.Gold -= item.Price;
+        }
+
+        public void SellToShop(Player player, List<IItem> InventoryItem, IItem item)
+        {
+            RemoveFromInventoryItem(InventoryItem, item);
+            player.Gold += item.Price * (float)0.5;
+        }
+
+        // 조합 메서드 //
+
+        public void RemoveFromInventoryItem(List<IItem> InventoryItem, IItem item)
+        {
+            InventoryItem.Remove(item);
+        }
+
+        public void RemoveFromEquippedItem(List<IEquipment> EquippedItem, IEquipment item)
+        {
+            EquippedItem.Remove(item);
+        }
+
+        public void AddToInventoryItem(List<IItem> InventoryItem, IItem item)
+        {
+            InventoryItem.Add(item);
+        }
+
+        public void AddToEquippedItem(List<IEquipment> EquippedItem, IEquipment item)
+        {
+            EquippedItem.Add(item);
+        }
+
+
+    }
+
+    public class Shop
+    {
+        public List<IItem> SellingItem = new List<IItem> { };
+        public Action<Player, List<IItem>, IItem> Buying;
+        public Action<Player, List<IItem>, IItem> Selling;
+
+        public void TriggerBuying(Player player, List<IItem> InventoryItem, IItem item)
+        {
+            Buying?.Invoke(player, InventoryItem, item);
+        }
+
+        public void TriggerSelling(Player player, List<IItem> InventoryItem, List<IItem> SellingItem, IItem item)
+        {
+            Selling?.Invoke(player, InventoryItem, item);
+        }
+    }
+
+
     public abstract class ClassGroup // 직업마다 각기 다른 부분을 구현하도록 '강제'해야하므로 virtual보다는 abstract가 적절
     {
         public abstract string Name { get; }
         public abstract int ClassAttack { get; }
         public abstract int ClassDefense { get; }
         public abstract float ClassHealth { get; }
-        public abstract int ClassGold { get; }
+        public abstract float ClassGold { get; }
 
         public void EnterAbility<T>(T target, T ability) // 다양한 타입의 필드에 값을 넣어야하기 때문에 제너릭으로 선언.
         {
@@ -213,7 +306,7 @@ namespace ItemPlayer
 
         public override int ClassDefense { get { return 5; } }
         public override float ClassHealth { get { return 100; } }
-        public override int ClassGold { get { return 50; } }
+        public override float ClassGold { get { return 50; } }
     }
 
     public class Faker : ClassGroup
@@ -223,7 +316,7 @@ namespace ItemPlayer
 
         public override int ClassDefense { get { return 0; } }
         public override float ClassHealth { get { return 100; } }
-        public override int ClassGold { get { return 1000000; } }
+        public override float ClassGold { get { return 1000000; } }
     }
 }
 
@@ -238,6 +331,9 @@ namespace GameLoop
         Scene currentScene = new TownScene();
 
         ClassGroup classGroup = new Warrior();
+
+        Shop shop = new Shop();
+
 
 
 
@@ -259,11 +355,24 @@ namespace GameLoop
         public void GameStart()
         {
             Player player = new Player(1, "Rtani", classGroup);
+            Inventory inventory = new Inventory();
 
             //SM.EnterScene += currentScene.ShowDescription;
             //SM.EnterScene += currentScene.ShowChoice;
 
             //SM.EnterCharacterUIScene += currentScene.ShowInfo;
+
+            shop.Buying += inventory.BuyFromShop;
+            shop.Selling += inventory.SellToShop;
+
+            Novice_Armor novice_armor = new Novice_Armor();
+            Spartan_Spear spartan_Spear = new Spartan_Spear();
+            HealingPotion healingPotion = new HealingPotion();
+            Old_Sword old_Sword = new Old_Sword();
+
+            shop.SellingItem.AddRange(new List<IItem> { novice_armor, spartan_Spear, healingPotion, old_Sword });
+            //샵 구매 디버깅
+            // shop.TriggerBuying(player, inventory.InventoryItem, novice_armor);
 
             while (isRunning)
             {
@@ -298,8 +407,17 @@ namespace GameLoop
                 }
                 else
                 {
-                    // 행동 선택지를 고른 경우
-                    Console.WriteLine(currentScene.engage[input]);
+                    //bool engageQuit = false;
+                    //int newInput;
+                    //while (!engageQuit)
+                    //{
+                        // 행동 선택지를 고른 경우
+                        currentScene.engageMethod[input - 1](currentScene, shop, inventory);
+
+                        //if (int.TryParse(Console.ReadLine(), out newInput))
+                        //{
+                        //}
+                    //}
                 }
             }
         }
@@ -373,7 +491,7 @@ namespace GameLoop
         protected string description;
         public List<string> engage = new List<string>();
         public List<string> connectedScene = new List<string>();
-
+        public List<Action<Scene, Shop, Inventory>> engageMethod = new List<Action<Scene, Shop, Inventory>>();
         public virtual void ShowName(Scene sceneName)
         {
             PrintText(sceneName.name);
@@ -461,12 +579,131 @@ namespace GameLoop
 
     public class ShopScene : LocationScene
     {
+        //Shop shop = new Shop(); // 없어도 될듯?
         public ShopScene()
         {
             name = "상점";
             description = "이곳은 상점입니다. 물품을 구매하고 판매할 수 있습니다.";
             engage.AddRange(new List<string> { "물품 구매", "물품 판매" });
             connectedScene.AddRange(new List<string>() { "마을", "캐릭터 정보창", "장비창" });
+            engageMethod.Add(BuyEngage);
+            engageMethod.Add(SellingEngage);
+        }
+
+        public void BuyEngage(Scene sceneName, Shop shop, Inventory inventory)
+        {
+            bool stopBuying = false;
+
+            while (!stopBuying)
+            {
+                ShowSellingItem(shop);
+                ShowBuying(shop, inventory, ref stopBuying);
+            }
+        }
+        public void ShowSellingItem(Shop shop)
+        {
+            {
+                int i = 1;
+                Console.WriteLine();
+                foreach (IItem item in shop.SellingItem)
+                {
+                    Console.WriteLine($"{i} {item.Name}\t|\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t \t|  가격: {item.Price}골드");
+                    i++;
+                }
+                Console.WriteLine($"\n{i} 돌아가기");
+                Console.WriteLine();
+            }
+        }
+
+        public void ShowBuying(Shop shop, Inventory inventory, ref bool stopBuying)
+        {
+            int input;
+            bool inputSuccess = false;
+
+            while (!inputSuccess)
+            {
+                if (int.TryParse(Console.ReadLine(), out input))
+                {
+                    if (input == shop.SellingItem.Count + 1)
+                    {
+                        //돌아가기
+                        inputSuccess = true;
+                        stopBuying = true;
+                        break;
+                    }
+                    else if (input < shop.SellingItem.Count + 1 && input > 0)
+                    {
+                        string tempItemName = shop.SellingItem[input - 1].ToString();
+                        inventory.InventoryItem.Add(shop.SellingItem[input - 1]);
+                        shop.SellingItem.RemoveAt(input - 1);
+
+                        Thread.Sleep(10);
+                        PrintText($"{tempItemName} 구매에 성공했습니다!", ConsoleColor.Green);
+                        Thread.Sleep(100);
+
+                        inputSuccess = true;
+
+
+                    }
+                }
+            }
+        }
+        public void SellingEngage(Scene sceneName, Shop shop, Inventory inventory)
+        {
+            bool stopSelling = false;
+
+            while (!stopSelling)
+            {
+                ShowInventoryItem(inventory);
+                ShowSelling(shop, inventory, ref stopSelling);
+            }
+        }
+        public void ShowInventoryItem( Inventory inventory)
+        {
+            {
+                int i = 1;
+                Console.WriteLine();
+                foreach (IItem item in inventory.InventoryItem)
+                {
+                    Console.WriteLine($"{i} {item.Name}\t|\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t \t|  가격: {item.Price * 0.5}골드");
+                    i++;
+                }
+                Console.WriteLine($"\n{i} 돌아가기");
+                Console.WriteLine();
+            }
+        }
+        public void ShowSelling(Shop shop, Inventory inventory, ref bool stopSelling)
+        {
+            int input;
+            bool inputSuccess = false;
+
+            while (!inputSuccess)
+            {
+                if (int.TryParse(Console.ReadLine(), out input))
+                {
+                    if (input == inventory.InventoryItem.Count + 1)
+                    {
+                        //돌아가기
+                        inputSuccess = true;
+                        stopSelling = true;
+                        break;
+                    }
+                    else if (input < inventory.InventoryItem.Count + 1 && input > 0)
+                    {
+                        string tempItemName = inventory.InventoryItem[input - 1].ToString();
+                        shop.SellingItem.Add(inventory.InventoryItem[input - 1]);
+                        inventory.InventoryItem.RemoveAt(input - 1);
+
+                        Thread.Sleep(10);
+                        PrintText($"{tempItemName} 판매에 성공했습니다!", ConsoleColor.Green);
+                        Thread.Sleep(100);
+
+                        inputSuccess = true;
+
+
+                    }
+                }
+            }
         }
     }
 
