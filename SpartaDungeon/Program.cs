@@ -412,12 +412,12 @@ namespace GameLoop
                     //int newInput;
                     //while (!engageQuit)
                     //{
-                        // 행동 선택지를 고른 경우
-                        currentScene.engageMethod[input - 1](player, currentScene, shop, inventory);
+                    // 행동 선택지를 고른 경우
+                    currentScene.engageMethod[input - 1](player, currentScene, shop, inventory, input);
 
-                        //if (int.TryParse(Console.ReadLine(), out newInput))
-                        //{
-                        //}
+                    //if (int.TryParse(Console.ReadLine(), out newInput))
+                    //{
+                    //}
                     //}
                 }
             }
@@ -492,7 +492,7 @@ namespace GameLoop
         protected string description;
         public List<string> engage = new List<string>();
         public List<string> connectedScene = new List<string>();
-        public List<Action<Player, Scene, Shop, Inventory>> engageMethod = new List<Action<Player, Scene, Shop, Inventory>>();
+        public List<Action<Player, Scene, Shop, Inventory, int>> engageMethod = new List<Action<Player, Scene, Shop, Inventory, int>>();
         public virtual void ShowName(Scene sceneName)
         {
             PrintText(sceneName.name);
@@ -587,31 +587,46 @@ namespace GameLoop
             description = "이곳은 상점입니다. 물품을 구매하고 판매할 수 있습니다.";
             engage.AddRange(new List<string> { "물품 구매", "물품 판매" });
             connectedScene.AddRange(new List<string>() { "마을", "캐릭터 정보창", "아이템창" });
-            engageMethod.Add(BuyEngage);
-            engageMethod.Add(SellingEngage);
+
+            engageMethod.Add(TradeEngage);
+            engageMethod.Add(TradeEngage);
         }
 
-        public void BuyEngage(Player player, Scene sceneName, Shop shop, Inventory inventory)
+        public void TradeEngage(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
         {
-            bool stopBuying = false;
-            bool isBuying = true;
-            while (!stopBuying)
+            bool stopTrading= false;
+            List<IItem> seller;
+            List<IItem> buyer;
+            bool isBuying = input == 1;
+
+            if (isBuying) // 누가 구매자인지
+            {
+                seller = shop.SellingItem;
+                buyer = inventory.InventoryItem;
+            }
+            else
+            {
+                seller = inventory.InventoryItem;
+                buyer = shop.SellingItem;
+            }
+
+            while (!stopTrading)
             {
                 Console.WriteLine($"[잔여 골드]");
                 PrintText($"  {player.Gold} \n ", ConsoleColor.Yellow);
                 Console.WriteLine($"[아이템 목록]");
 
-                ShowSellingItem(shop);
+                ShowSellerItem(seller);
 
-                ShowBuying(player, shop, inventory, ref stopBuying);
+                ShowTrading(player, seller, buyer, ref stopTrading, isBuying);
             }
         }
-        public void ShowSellingItem(Shop shop)
+        public void ShowSellerItem(List<IItem> seller)
         {
             {
                 int i = 1;
                 Console.WriteLine();
-                foreach (IItem item in shop.SellingItem)
+                foreach (IItem item in seller)
                 {
                     Console.WriteLine($"- [{i}] \t {item.Name}\t |\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t \t|  가격: {item.Price}골드");
                     i++;
@@ -621,7 +636,7 @@ namespace GameLoop
             }
         }
 
-        public void ShowBuying(Player player, Shop shop, Inventory inventory, ref bool stopBuying)
+        public void ShowTrading(Player player, List<IItem> seller, List<IItem> buyer, ref bool stopBuying, bool isBuying)
         {
             int input;
             bool inputSuccess = false;
@@ -630,24 +645,38 @@ namespace GameLoop
             {
                 if (int.TryParse(Console.ReadLine(), out input))
                 {
-                    if (input == shop.SellingItem.Count + 1)
+                    if (input == seller.Count + 1)
                     {
                         //돌아가기
                         inputSuccess = true;
                         stopBuying = true;
                         break;
                     }
-                    else if (input < shop.SellingItem.Count + 1 && input > 0)
+                    else if (input < seller.Count + 1 && input > 0)
                     {
-                        if (player.Gold > shop.SellingItem[input - 1].Price)
+                        if (player.Gold > seller[input - 1].Price || isBuying == false)
                         {
-                            string tempItemName = shop.SellingItem[input - 1].ToString();
-                            player.Gold -= shop.SellingItem[input - 1].Price;
-                            inventory.InventoryItem.Add(shop.SellingItem[input - 1]);
-                            shop.SellingItem.RemoveAt(input - 1);
-                            
+                            string tempItemName = seller[input - 1].Name.ToString();
+                            if (isBuying == true) 
+                            { 
+                                player.Gold -= seller[input - 1].Price; 
+                            }
+                            else
+                            {
+                                player.Gold += seller[input - 1].Price * (float)0.5;
+                            }
+                            buyer.Add(seller[input - 1]);
+                            seller.RemoveAt(input - 1);
+
                             Thread.Sleep(10);
+                            if(isBuying == true) 
+                            {
                             PrintText($"{tempItemName} 구매에 성공했습니다!", ConsoleColor.Green);
+                            }
+                            else
+                            {
+                                PrintText($"{tempItemName} 판매에 성공했습니다!", ConsoleColor.Green);
+                            }
                             Thread.Sleep(100);
 
                             inputSuccess = true;
@@ -661,64 +690,64 @@ namespace GameLoop
                 }
             }
         }
-        public void SellingEngage(Player player, Scene sceneName, Shop shop, Inventory inventory)
-        {
-            bool stopSelling = false;
+        //public void SellingEngage(Player player, Scene sceneName, Shop shop, Inventory inventory)
+        //{
+        //    bool stopSelling = false;
 
-            while (!stopSelling)
-            {
-                ShowInventoryItem(inventory);
-                ShowSelling(player, shop, inventory, ref stopSelling);
-            }
-        }
-        public void ShowInventoryItem( Inventory inventory)
-        {
-            {
-                int i = 1;
-                Console.WriteLine();
-                foreach (IItem item in inventory.InventoryItem)
-                {
-                    Console.WriteLine($"- [{i}] \t {item.Name}\t|\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t \t|  가격: {item.Price * 0.5}골드");
-                    i++;
-                }
-                Console.WriteLine($"\n{i} 돌아가기");
-                Console.WriteLine();
-            }
-        }
-        public void ShowSelling(Player player, Shop shop, Inventory inventory, ref bool stopSelling)
-        {
-            int input;
-            bool inputSuccess = false;
+        //    while (!stopSelling)
+        //    {
+        //        ShowInventoryItem(inventory);
+        //        ShowSelling(player, shop, inventory, ref stopSelling);
+        //    }
+        //}
+        //public void ShowInventoryItem(Inventory inventory)
+        //{
+        //    {
+        //        int i = 1;
+        //        Console.WriteLine();
+        //        foreach (IItem item in inventory.InventoryItem)
+        //        {
+        //            Console.WriteLine($"- [{i}] \t {item.Name}\t|\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t \t|  가격: {item.Price * 0.5}골드");
+        //            i++;
+        //        }
+        //        Console.WriteLine($"\n{i} 돌아가기");
+        //        Console.WriteLine();
+        //    }
+        //}
+        //public void ShowSelling(Player player, Shop shop, Inventory inventory, ref bool stopSelling)
+        //{
+        //    int input;
+        //    bool inputSuccess = false;
 
-            while (!inputSuccess)
-            {
-                if (int.TryParse(Console.ReadLine(), out input))
-                {
-                    if (input == inventory.InventoryItem.Count + 1)
-                    {
-                        //돌아가기
-                        inputSuccess = true;
-                        stopSelling = true;
-                        break;
-                    }
-                    else if (input < inventory.InventoryItem.Count + 1 && input > 0)
-                    {
-                        string tempItemName = inventory.InventoryItem[input - 1].ToString();
-                        player.Gold += inventory.InventoryItem[input - 1].Price;
-                        shop.SellingItem.Add(inventory.InventoryItem[input - 1]);
-                        inventory.InventoryItem.RemoveAt(input - 1);
+        //    while (!inputSuccess)
+        //    {
+        //        if (int.TryParse(Console.ReadLine(), out input))
+        //        {
+        //            if (input == inventory.InventoryItem.Count + 1)
+        //            {
+        //                //돌아가기
+        //                inputSuccess = true;
+        //                stopSelling = true;
+        //                break;
+        //            }
+        //            else if (input < inventory.InventoryItem.Count + 1 && input > 0)
+        //            {
+        //                string tempItemName = inventory.InventoryItem[input - 1].ToString();
+        //                player.Gold += inventory.InventoryItem[input - 1].Price;
+        //                shop.SellingItem.Add(inventory.InventoryItem[input - 1]);
+        //                inventory.InventoryItem.RemoveAt(input - 1);
 
-                        Thread.Sleep(10);
-                        PrintText($"{tempItemName} 판매에 성공했습니다!", ConsoleColor.Green);
-                        Thread.Sleep(100);
+        //                Thread.Sleep(10);
+        //                PrintText($"{tempItemName} 판매에 성공했습니다!", ConsoleColor.Green);
+        //                Thread.Sleep(100);
 
-                        inputSuccess = true;
+        //                inputSuccess = true;
 
 
-                    }
-                }
-            }
-        }
+        //            }
+        //        }
+        //    }
+        //}
     }
 
     public class UIScene : Scene
