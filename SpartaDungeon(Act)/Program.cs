@@ -334,7 +334,8 @@ namespace GameLoop
         public void TriggerEnterScene(Scene i, Player player)
         {
             Console.Clear(); // 로그 클리어.
-
+            i.ShowName(i);
+            Console.ResetColor();
             i.ShowDescription(i);
             if (i is UIScene)
             {
@@ -354,13 +355,17 @@ namespace GameLoop
 
     public class Scene
     {
+        public string name;
         protected string description;
         public List<string> engage = new List<string>();
         public List<string> connectedScene = new List<string>();
 
+        public virtual void ShowName(Scene sceneName)
+        {
+            PrintText(sceneName.name);
+        }
         public void ShowDescription(Scene sceneName)
         {
-            // Console.Clear(); // 로그 클리어.
             Console.WriteLine(sceneName.description + "\n");
 
             ///// 여기서 description이 직전에 했던 것으로 고정되는 문제가 있음. 처음 생성된 Scene 클래스의 객체가 할당한 값으로 고정돼버림. 이유는 몰라.
@@ -384,6 +389,13 @@ namespace GameLoop
         }
 
         public virtual void ShowInfo(Player player) { }
+
+        public void PrintText(string text, ConsoleColor color = ConsoleColor.White)
+        {
+            Console.ForegroundColor = color;
+            Console.WriteLine(text);
+            Console.ResetColor();
+        }
     }
 
     public class LocationScene : Scene
@@ -398,6 +410,7 @@ namespace GameLoop
         //////////////////생성자로 부모 클래스가 생성한 Engage,ConnectScene, description 필드의 값을 새로이 할당/////////////////
         public TownScene()
         {
+            name = "마을";
             description = "이곳은 마을입니다. 무기를 정비하고 휴식을 취할 수 있습니다.";
             engage.AddRange(new List<string> { "하늘 보기", "마을 순찰" });
             connectedScene.AddRange(new List<string> { "RestScene", "ShopScene", "DungeonScene", "CharacterScene", "InventoryScene" });
@@ -408,6 +421,7 @@ namespace GameLoop
     {
         public RestScene()
         {
+            name = "여관";
             description = "여관에 들어왔습니다. 휴식을 취하거나 식사를 할 수 있습니다.";
             engage.AddRange(new List<string> { "휴식 하기(20G)", "식사 하기(50G)" });
             connectedScene.AddRange(new List<string> { "TownScene", "CharacterScene", "InventoryScene" });
@@ -415,8 +429,13 @@ namespace GameLoop
     }
     public class DungeonScene : LocationScene
     {
+        public override void ShowName(Scene sceneName)
+        {
+            PrintText(sceneName.name, ConsoleColor.Red);
+        }
         public DungeonScene()
         {
+            name = "던전";
             description = "이곳은 던전 입구입니다. 조심하세요.";
             engage.AddRange(new List<string> { "사냥터 입장", "요새 입장", "지옥 입장" });
             connectedScene.AddRange(new List<string> { "TownScene", "CharacterScene", "InventoryScene" });
@@ -427,6 +446,7 @@ namespace GameLoop
     {
         public ShopScene()
         {
+            name = "상점";
             description = "이곳은 상점입니다. 물품을 구매하고 판매할 수 있습니다.";
             engage.AddRange(new List<string> { "물품 구매", "물품 판매" });
             connectedScene.AddRange(new List<string>() { "TownScene", "CharacterScene", "InventoryScene" });
@@ -457,14 +477,13 @@ namespace GameLoop
             }
             Console.WriteLine();
         }
-
-
     }
 
     public class InventoryScene : UIScene
     {
         public InventoryScene(Scene currentScene, ref Scene tempForUI) : base(currentScene, ref tempForUI)
         {
+            name = "장비창";
             description = "이곳은 장비창입니다. 장비를 관리할 수 있습니다.";
             engage.AddRange(new List<string> { "장착 관리" });
             connectedScene.AddRange(new List<string> { "돌아가기" });
@@ -475,6 +494,7 @@ namespace GameLoop
     {
         public CharacterScene(Scene currentScene, ref Scene tempForUI) : base(currentScene, ref tempForUI)
         {
+            name = "캐릭터 정보창";
             description = "이곳은 캐릭터창입니다. 캐릭터의 정보를 확인할 수 있습니다.";
             connectedScene.AddRange(new List<string> { "돌아가기" });
         }
