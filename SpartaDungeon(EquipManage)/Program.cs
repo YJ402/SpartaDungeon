@@ -95,23 +95,44 @@ namespace ItemPlayer
 
         public EquipmentSlot Slot = EquipmentSlot.weapon;
 
-        public void Equip(Player player, IItem item)
+        public void EquipOrUnEquip(Player player, IEquipment item, Inventory inventory)
         {
-
-            if (!player.equippingSlot.ContainsValue(Slot))
+            //착용하고 있는 아이템인지 검사
+            if (!inventory.EquippedItem.Contains(item))
             {
-                player.Attack += WeaponAttack;
-                player.equippingSlot.Add(item.Name, Slot);
+                //착용 부위인지 검사
+                if (!player.equippingSlot.ContainsValue(Slot))
+                {
+                    player.Attack += WeaponAttack;
+                    player.equippingSlot.Add(item.Name, Slot);
+                    inventory.EquippedItem.Add(item);
+                }
+                else
+                {
+                    Console.WriteLine("이미 착용한 부위입니다");
+                }
             }
             else
             {
-                Console.WriteLine("이미 착용한 부위입니다");
+                //착용 해제하기
+                player.Attack -= WeaponAttack;
+                player.equippingSlot.Remove(item.Name);
+                inventory.EquippedItem.Remove(item);
             }
         }
-        public void UnEquip(Player player)
-        {
-            player.Attack -= WeaponAttack;
-        }
+        //public void UnEquip(Player player)
+        //{
+        //    if (!player.equippingSlot.ContainsValue(Slot))
+        //    {
+        //        player.Attack += WeaponAttack;
+        //        player.equippingSlot.Add(item.Name, Slot);
+        //    }
+        //    else
+        //    {
+        //        Console.WriteLine("이미 착용한 부위입니다");
+        //    }
+        //    player.Attack -= WeaponAttack;
+        //}
 
         public void Attackable()
         {
@@ -408,6 +429,11 @@ namespace GameLoop
             shop.SellingItem.AddRange(new List<IItem> { novice_armor, spartan_Spear, healingPotion, old_Sword });
             //샵 구매 디버깅
             // shop.TriggerBuying(player, inventory.InventoryItem, novice_armor);
+
+            //착용하기, 이미 착용 문구 보기, 착용 해제하기 테스팅 
+            //spartan_Spear.EquipOrUnEquip(player, spartan_Spear, inventory);
+            //old_Sword.EquipOrUnEquip(player, old_Sword, inventory);
+            //spartan_Spear.EquipOrUnEquip(player, spartan_Spear, inventory);
 
             while (isRunning)
             {
