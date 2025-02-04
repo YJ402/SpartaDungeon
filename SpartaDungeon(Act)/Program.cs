@@ -214,7 +214,7 @@ namespace ItemPlayer
         public List<IEquipment> EquippedItem = new List<IEquipment> { };
         Shop shop = new Shop();
 
-        // 장비관리 //
+        // 아이템관리 //
         public void EquipItem(List<IItem> InventoryItem, List<IEquipment> EquippedItem, IEquipment item)
         {
             AddToEquippedItem(EquippedItem, item);
@@ -448,7 +448,7 @@ namespace GameLoop
                     case "캐릭터 정보창":
                         currentScene = new CharacterScene(currentScene, ref tempForUI);
                         break;
-                    case "장비창":
+                    case "아이템창":
                         currentScene = new InventoryScene(currentScene, ref tempForUI);
                         break;
                     case "상점":
@@ -549,7 +549,7 @@ namespace GameLoop
             name = "마을";
             description = "이곳은 마을입니다. 무기를 정비하고 휴식을 취할 수 있습니다.";
             engage.AddRange(new List<string> { "하늘 보기", "마을 순찰" });
-            connectedScene.AddRange(new List<string> { "여관", "상점", "던전", "캐릭터 정보창", "장비창" });
+            connectedScene.AddRange(new List<string> { "여관", "상점", "던전", "캐릭터 정보창", "아이템창" });
         }
     }
 
@@ -560,7 +560,7 @@ namespace GameLoop
             name = "여관";
             description = "여관에 들어왔습니다. 휴식을 취하거나 식사를 할 수 있습니다.";
             engage.AddRange(new List<string> { "휴식 하기(20G)", "식사 하기(50G)" });
-            connectedScene.AddRange(new List<string> { "마을", "캐릭터 정보창", "장비창" });
+            connectedScene.AddRange(new List<string> { "마을", "캐릭터 정보창", "아이템창" });
         }
     }
     public class DungeonScene : LocationScene
@@ -574,7 +574,7 @@ namespace GameLoop
             name = "던전";
             description = "이곳은 던전 입구입니다. 조심하세요.";
             engage.AddRange(new List<string> { "사냥터 입장", "요새 입장", "지옥 입장" });
-            connectedScene.AddRange(new List<string> { "마을", "캐릭터 정보창", "장비창" });
+            connectedScene.AddRange(new List<string> { "마을", "캐릭터 정보창", "아이템창" });
         }
     }
 
@@ -586,7 +586,7 @@ namespace GameLoop
             name = "상점";
             description = "이곳은 상점입니다. 물품을 구매하고 판매할 수 있습니다.";
             engage.AddRange(new List<string> { "물품 구매", "물품 판매" });
-            connectedScene.AddRange(new List<string>() { "마을", "캐릭터 정보창", "장비창" });
+            connectedScene.AddRange(new List<string>() { "마을", "캐릭터 정보창", "아이템창" });
             engageMethod.Add(BuyEngage);
             engageMethod.Add(SellingEngage);
         }
@@ -597,8 +597,11 @@ namespace GameLoop
 
             while (!stopBuying)
             {
-                PrintText($"잔여 골드{player.Gold}", ConsoleColor.Yellow);
+                Console.WriteLine($"[잔여 골드]");
+                PrintText($"  {player.Gold} \n ", ConsoleColor.Yellow);
+                Console.WriteLine($"[아이템 목록]");
                 ShowSellingItem(shop);
+
                 ShowBuying(player, shop, inventory, ref stopBuying);
             }
         }
@@ -609,7 +612,7 @@ namespace GameLoop
                 Console.WriteLine();
                 foreach (IItem item in shop.SellingItem)
                 {
-                    Console.WriteLine($"{i} {item.Name}\t|\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t \t|  가격: {item.Price}골드");
+                    Console.WriteLine($"- [{i}] \t {item.Name}\t |\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t \t|  가격: {item.Price}골드");
                     i++;
                 }
                 Console.WriteLine($"\n{i} 돌아가기");
@@ -674,7 +677,7 @@ namespace GameLoop
                 Console.WriteLine();
                 foreach (IItem item in inventory.InventoryItem)
                 {
-                    Console.WriteLine($"{i} {item.Name}\t|\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t \t|  가격: {item.Price * 0.5}골드");
+                    Console.WriteLine($"- [{i}] \t {item.Name}\t|\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t \t|  가격: {item.Price * 0.5}골드");
                     i++;
                 }
                 Console.WriteLine($"\n{i} 돌아가기");
@@ -748,8 +751,8 @@ namespace GameLoop
     {
         public InventoryScene(Scene currentScene, ref Scene tempForUI) : base(currentScene, ref tempForUI)
         {
-            name = "장비창";
-            description = "이곳은 장비창입니다. 장비를 관리할 수 있습니다.";
+            name = "아이템창";
+            description = "이곳은 아이템창입니다. 아이템을 관리할 수 있습니다.";
             engage.AddRange(new List<string> { "장착 관리" });
             connectedScene.AddRange(new List<string> { "돌아가기" });
         }
