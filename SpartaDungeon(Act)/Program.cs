@@ -59,21 +59,48 @@ namespace ItemPlayer
         }
     }
 
-    public class Weapon : IEquipment
+    public abstract class Weapon : IEquipment
     {
-        int Attack;
-        int Price;
-        string Description;
+        protected abstract string Name { get; }
+        protected abstract int WeaponAttack { get; }
+        protected abstract int Price { get; }
+        protected abstract string Description { get; }
 
         public void Attackable()
         {
             //공격 가능
+        }
+    }
+    public class Old_Sword : Weapon
+    {
+        protected override string Name { get { return "낡은 검"; } }
+        protected override int WeaponAttack { get { return 2; } }
+        protected override int Price { get { return 100; } }
+        protected override string Description { get { return "찔리면 파상풍에 걸릴 거 같은 검입니다."; } }
+
+        public void Buyable()
+        {
+            //구매 가능
+        }
+
+        public void Sellable()
+        {
+            //판매 가능
+        }
+
+        public void Equippable()
+        {
+            //장착 가능
         }
     }
 
     public class Spartan_Spear : Weapon
     {
-        string Description = "스파르타의 전사들이 사용했다는 전설의 창입니다.";
+        protected override string Name { get { return "스파르타의 창"; } }
+        protected override int WeaponAttack { get { return 7; } }
+        protected override int Price { get { return 2000; } }
+        protected override string Description { get { return "스파르타의 전사들이 사용했다는 전설의 창입니다."; } }
+
         public void Buyable()
         {
             //구매 가능
@@ -88,30 +115,23 @@ namespace ItemPlayer
         {
             //장착 가능
         }
-
-        public Spartan_Spear(int attack, int price)
-        {
-            int Attack = attack;
-            int Price = price;
-        }
     }
 
-    public class Armor : IEquipment
+    public abstract class Armor : IEquipment
     {
-        int Defense;
-        int Price;
-        string Description;
-
-        public void Attackable()
-        {
-            //공격 가능
-        }
+        protected abstract string Name { get; }
+        protected abstract int ArmorDefense { get; }
+        protected abstract int Price { get; }
+        protected abstract string Description { get; }
     }
 
 
     public class Novice_Armor : Armor
     {
-        string Description = "수련에 도움을 주는 갑옷입니다.";
+        protected override string Name { get { return "수련자의 갑옷"; } }
+        protected override int ArmorDefense { get { return 5; } }
+        protected override int Price { get { return 1000; } }
+        protected override string Description { get { return "수련에 도움을 주는 갑옷입니다."; } }
 
         public void Buyable()
         {
@@ -126,12 +146,6 @@ namespace ItemPlayer
         public void Equippable()
         {
             //장착 가능
-        }
-
-        public Novice_Armor(int defense, int price)
-        {
-            int Defense = defense;
-            int Price = price;
         }
     }
 
@@ -180,7 +194,7 @@ namespace ItemPlayer
 
     public abstract class ClassGroup // 직업마다 각기 다른 부분을 구현하도록 '강제'해야하므로 virtual보다는 abstract가 적절
     {
-        public abstract string Name { get;  }
+        public abstract string Name { get; }
         public abstract int ClassAttack { get; }
         public abstract int ClassDefense { get; }
         public abstract float ClassHealth { get; }
@@ -194,7 +208,7 @@ namespace ItemPlayer
 
     public class Warrior : ClassGroup
     {
-        public override string Name { get { return "전사";  } }
+        public override string Name { get { return "전사"; } }
         public override int ClassAttack { get { return 20; } }
 
         public override int ClassDefense { get { return 5; } }
@@ -231,11 +245,11 @@ namespace GameLoop
         private GameManager() { }
         public static GameManager GetInstance()
         {
-            if(instance == null)
+            if (instance == null)
             {
-                instance = new GameManager();   
+                instance = new GameManager();
             }
-            
+
             return instance;
         }
 
@@ -262,11 +276,11 @@ namespace GameLoop
 
                 while (!inputSuccess)
                 {
-                    
+
                     Console.Write("행동을 선택해주세요: ");
                     //씬 선택지 입력, //입력을 씬 매개변수에 입력.
                     inputSuccess = int.TryParse(Console.ReadLine(), out input);
-                    inputSuccess =  0 < input && input < currentScene.engage.Count + currentScene.connectedScene.Count + 1;
+                    inputSuccess = 0 < input && input < currentScene.engage.Count + currentScene.connectedScene.Count + 1;
                     if (!inputSuccess)
                     {
                         Console.Write("올바른 입력해주세요!");
@@ -295,7 +309,7 @@ namespace GameLoop
     {
         public Action<Scene> EnterScene; // 씬 입장시 발생하는 이벤트:(씬 소개 메서드, 씬 선택지 메서드)
         public Action<Player> EnterCharacterUIScene; // UI 씬 입장시 발생하는 이벤트:(씬 소개 메서드, 씬 선택지 메서드)
-        
+
         Scene tempForUI;
 
 
