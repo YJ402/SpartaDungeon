@@ -380,11 +380,14 @@ namespace GameLoop
                 i++;
             }
 
+            Console.WriteLine();
+
             while (i - sceneName.engage.Count - 1 < sceneName.connectedScene.Count)
             {
                 Console.WriteLine($"{i}. {sceneName.connectedScene[i - sceneName.engage.Count - 1]} (으)로 이동하기");
                 i++;
             }
+
             Console.WriteLine();
         }
 
@@ -469,6 +472,7 @@ namespace GameLoop
                 Console.WriteLine($"{i}. {sceneName.engage[i - 1]}");
                 i++;
             }
+            Console.WriteLine();
 
             while (i - sceneName.engage.Count - 1 < sceneName.connectedScene.Count)
             {
