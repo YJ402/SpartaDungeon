@@ -3,6 +3,7 @@ using GameLoop;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Diagnostics;
 
 namespace ItemPlayer
 {
@@ -356,7 +357,7 @@ namespace GameLoop
         {
             Player player = new Player(1, "Rtani", classGroup);
             Inventory inventory = new Inventory();
-
+            player.Gold += 100000;
             //SM.EnterScene += currentScene.ShowDescription;
             //SM.EnterScene += currentScene.ShowChoice;
 
@@ -412,7 +413,7 @@ namespace GameLoop
                     //while (!engageQuit)
                     //{
                         // 행동 선택지를 고른 경우
-                        currentScene.engageMethod[input - 1](currentScene, shop, inventory);
+                        currentScene.engageMethod[input - 1](player, currentScene, shop, inventory);
 
                         //if (int.TryParse(Console.ReadLine(), out newInput))
                         //{
@@ -491,7 +492,7 @@ namespace GameLoop
         protected string description;
         public List<string> engage = new List<string>();
         public List<string> connectedScene = new List<string>();
-        public List<Action<Scene, Shop, Inventory>> engageMethod = new List<Action<Scene, Shop, Inventory>>();
+        public List<Action<Player, Scene, Shop, Inventory>> engageMethod = new List<Action<Player, Scene, Shop, Inventory>>();
         public virtual void ShowName(Scene sceneName)
         {
             PrintText(sceneName.name);
@@ -590,14 +591,15 @@ namespace GameLoop
             engageMethod.Add(SellingEngage);
         }
 
-        public void BuyEngage(Scene sceneName, Shop shop, Inventory inventory)
+        public void BuyEngage(Player player, Scene sceneName, Shop shop, Inventory inventory)
         {
             bool stopBuying = false;
 
             while (!stopBuying)
             {
+                PrintText($"잔여 골드{player.Gold}", ConsoleColor.Yellow);
                 ShowSellingItem(shop);
-                ShowBuying(shop, inventory, ref stopBuying);
+                ShowBuying(player, shop, inventory, ref stopBuying);
             }
         }
         public void ShowSellingItem(Shop shop)
@@ -615,7 +617,7 @@ namespace GameLoop
             }
         }
 
-        public void ShowBuying(Shop shop, Inventory inventory, ref bool stopBuying)
+        public void ShowBuying(Player player, Shop shop, Inventory inventory, ref bool stopBuying)
         {
             int input;
             bool inputSuccess = false;
@@ -633,29 +635,36 @@ namespace GameLoop
                     }
                     else if (input < shop.SellingItem.Count + 1 && input > 0)
                     {
-                        string tempItemName = shop.SellingItem[input - 1].ToString();
-                        inventory.InventoryItem.Add(shop.SellingItem[input - 1]);
-                        shop.SellingItem.RemoveAt(input - 1);
+                        if (player.Gold > shop.SellingItem[input - 1].Price)
+                        {
+                            string tempItemName = shop.SellingItem[input - 1].ToString();
+                            player.Gold -= shop.SellingItem[input - 1].Price;
+                            inventory.InventoryItem.Add(shop.SellingItem[input - 1]);
+                            shop.SellingItem.RemoveAt(input - 1);
+                            
+                            Thread.Sleep(10);
+                            PrintText($"{tempItemName} 구매에 성공했습니다!", ConsoleColor.Green);
+                            Thread.Sleep(100);
 
-                        Thread.Sleep(10);
-                        PrintText($"{tempItemName} 구매에 성공했습니다!", ConsoleColor.Green);
-                        Thread.Sleep(100);
-
-                        inputSuccess = true;
-
+                            inputSuccess = true;
+                        }
+                        else
+                        {
+                            Console.WriteLine("소지 골드가 부족합니다!");
+                        }
 
                     }
                 }
             }
         }
-        public void SellingEngage(Scene sceneName, Shop shop, Inventory inventory)
+        public void SellingEngage(Player player, Scene sceneName, Shop shop, Inventory inventory)
         {
             bool stopSelling = false;
 
             while (!stopSelling)
             {
                 ShowInventoryItem(inventory);
-                ShowSelling(shop, inventory, ref stopSelling);
+                ShowSelling(player, shop, inventory, ref stopSelling);
             }
         }
         public void ShowInventoryItem( Inventory inventory)
@@ -672,7 +681,7 @@ namespace GameLoop
                 Console.WriteLine();
             }
         }
-        public void ShowSelling(Shop shop, Inventory inventory, ref bool stopSelling)
+        public void ShowSelling(Player player, Shop shop, Inventory inventory, ref bool stopSelling)
         {
             int input;
             bool inputSuccess = false;
@@ -691,6 +700,7 @@ namespace GameLoop
                     else if (input < inventory.InventoryItem.Count + 1 && input > 0)
                     {
                         string tempItemName = inventory.InventoryItem[input - 1].ToString();
+                        player.Gold += inventory.InventoryItem[input - 1].Price;
                         shop.SellingItem.Add(inventory.InventoryItem[input - 1]);
                         inventory.InventoryItem.RemoveAt(input - 1);
 
