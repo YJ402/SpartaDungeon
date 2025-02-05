@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
+using System;
 
 namespace ItemPlayer
 {
@@ -56,7 +57,7 @@ namespace ItemPlayer
         public void UseItem(Player player, IPotion item, Inventory inventory)
         {
             player.Health += 20;
-            inventory.InventoryItem.Remove(item);   
+            inventory.InventoryItem.Remove(item);
         }
         public void Buyable()
         {
@@ -254,7 +255,7 @@ namespace ItemPlayer
     {
         public string Name { get; set; }
 
-        public float Health { get; set; }
+        public abstract float Health { get; set; }
 
         public int Attack { get; set; }
 
@@ -268,9 +269,49 @@ namespace ItemPlayer
 
         public ClassGroup playerClass;
 
-        public float Gold { get; set; }
+        private bool isDie;
+        public bool IsDie {  get; private set; }
 
+        private float gold;
+        public float Gold
+        {
+            get { return gold; }
+            set
+            {
+                gold = value;
+            }
+        }
         public int Lv { get; set; }
+        private float health;
+        public override float Health
+        {
+            get {
+                if (health < 0)
+                {
+                    health = 0;
+                    IsDie = true;
+                    return health;
+                }
+                    
+                    return health; }
+            set
+            {
+                if (value <= 0)
+                {
+                    IsDie = true;
+                    health = 0;
+                }
+                else if (value > MaxHealth)
+                {
+                    health = MaxHealth;
+                }
+                else 
+                {
+                    health = value;  
+                }
+            }
+        }
+        public float MaxHealth { get; set; }
 
         public Dictionary<string, EquipmentSlot> equippingSlot = new Dictionary<string, EquipmentSlot>(); // 플레이어가 착용 중임을 의미하는 equippingSlot 딕셔너리 
 
@@ -281,17 +322,28 @@ namespace ItemPlayer
             playerClass = classGroup;
             Attack = playerClass.ClassAttack;
             Defense = playerClass.ClassDefense;
-            Health = playerClass.ClassHealth;
+            health = playerClass.ClassHealth;
+            MaxHealth = playerClass.ClassMaxHealth;
             Gold = playerClass.ClassGold;
             Lv = level;
             Name = name;
+        }
+
+        public ref float GethealthRef()
+        {
+            return ref health;
+        }
+
+        public ref float GetgoldRef()
+        {
+            return ref gold;
         }
     }
 
     public class Inventory
     {
         public List<IItem> InventoryItem = new List<IItem> { };
-        public List<IEquipment> EquippedItem = new List<IEquipment> { };
+        public List<IEquipment> EquippedItem = new List<IEquipment> { }; ///////// EquipSlot이랑 통합할 수도 있을까?
 
         Shop shop = new Shop();
 
@@ -373,6 +425,7 @@ namespace ItemPlayer
         public abstract int ClassAttack { get; }
         public abstract int ClassDefense { get; }
         public abstract float ClassHealth { get; }
+        public abstract float ClassMaxHealth { get; }
         public abstract float ClassGold { get; }
 
         public void EnterAbility<T>(T target, T ability) // 다양한 타입의 필드에 값을 넣어야하기 때문에 제너릭으로 선언.
@@ -388,6 +441,7 @@ namespace ItemPlayer
 
         public override int ClassDefense { get { return 5; } }
         public override float ClassHealth { get { return 100; } }
+        public override float ClassMaxHealth { get { return 100; } }
         public override float ClassGold { get { return 50; } }
     }
 
@@ -398,6 +452,7 @@ namespace ItemPlayer
 
         public override int ClassDefense { get { return 0; } }
         public override float ClassHealth { get { return 100; } }
+        public override float ClassMaxHealth { get { return 100; } }
         public override float ClassGold { get { return 1000000; } }
     }
 }
@@ -499,13 +554,17 @@ namespace GameLoop
                     //while (!engageQuit)
                     //{
                     // 행동 선택지를 고른 경우
-                    currentScene.engageMethod[input - 1](player, currentScene, shop, inventory, input);
+                    currentScene.engage_Method[input - 1](player, currentScene, shop, inventory, input);
 
                     //if (int.TryParse(Console.ReadLine(), out newInput))
                     //{
                     //}
                     //}
                 }
+
+                if (player.IsDie)
+                    isRunning = false;
+                
             }
         }
     }
@@ -578,7 +637,7 @@ namespace GameLoop
         protected string description;
         public List<string> engage = new List<string>();
         public List<string> connectedScene = new List<string>();
-        public List<Action<Player, Scene, Shop, Inventory, int>> engageMethod = new List<Action<Player, Scene, Shop, Inventory, int>>();
+        public List<Action<Player, Scene, Shop, Inventory, int>> engage_Method = new List<Action<Player, Scene, Shop, Inventory, int>>();
         public virtual void ShowName(Scene sceneName)
         {
             PrintText(sceneName.name);
@@ -612,11 +671,94 @@ namespace GameLoop
 
         public virtual void ShowInfo(Player player) { }
 
-        public void PrintText(string text, ConsoleColor color = ConsoleColor.White)
+        public void PrintText(string text, int ms = 0, ConsoleColor color = ConsoleColor.White)
         {
             Console.ForegroundColor = color;
             Console.WriteLine(text);
             Console.ResetColor();
+            Thread.Sleep(ms);
+        }
+
+        public void YesOrNo(string warning, out bool yes)
+        {
+            Console.WriteLine(warning);
+            Console.WriteLine("\n \n 1.네 \n 2.아니오");
+
+            while (true)
+            {
+                int input;
+                if (int.TryParse(Console.ReadLine(), out input))
+                {
+                    if (input == 1)
+                    {
+                        yes = true;
+                        break;
+                    }
+                    else if (input == 2)
+                    {
+                        yes = false;
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("잘못된 입력입니다");
+                    }
+                }
+            }
+        }
+
+        public void SuccessOrNot(Player player, string engageName, float minStat1, float reward, ref float rewardRef, string rewardName, float rewardDegree, float penalty, ref float penaltyRef, string penaltyName, float penaltyDegree, float bonusstat, float stat1)
+        {
+            //보너스 스탯
+            int tempBonusstat = (int)bonusstat;
+
+            //원래의 보상, 페널티 스텟 저장
+            float tempReward = reward;
+            float tempPenalty = penalty;
+
+            //보너스 스텟에 따른 랜덤값
+            int randNum1 = new Random().Next(tempBonusstat, tempBonusstat * 2);
+
+
+            //페널티 정도에 따른 성공시의 랜덤값
+            int randNum2 = new Random().Next((int)(penaltyDegree), (int)(penaltyDegree * 1.75));
+
+            //페널티 정도에 따른 실패시의 랜덤값
+            int randNum3 = new Random().Next((int)(penaltyDegree*1.25), (int)(penaltyDegree * 2));
+
+
+
+            if (stat1 >= minStat1 || TryChance(100 + (stat1 - minStat1) / minStat1 * 100 - 30))
+            {
+                //보상 결정, 프로퍼티 로직 사용할 수 있게.
+                reward += rewardDegree * (1 + randNum1 / 100);
+                rewardRef = reward;
+
+                //페널티 결정, 프로퍼티 로직 사용할 수 있게.
+                penalty -= randNum2 + stat1 - minStat1;
+                penaltyRef = penalty;
+                PrintText($"{engageName}에 성공했습니다!", 300, ConsoleColor.Blue);
+                PrintText("[탐험 결과]", 200, ConsoleColor.Blue);
+                PrintText($"{rewardName} {tempReward} -> {rewardRef}", 0, ConsoleColor.DarkBlue);
+                PrintText($"{penaltyName} {tempPenalty} -> {penaltyRef}", 1000, ConsoleColor.DarkBlue);
+            }
+            else
+            {
+                //페널티 결정, 프로퍼티 로직 사용할 수 있게.
+                penalty -= randNum3 + stat1 - minStat1;
+                penaltyRef = penalty;
+
+                PrintText($"{engageName}에 실패했습니다!", 300, ConsoleColor.Red);
+                PrintText("[탐험 결과]", 200, ConsoleColor.Blue);
+                PrintText($"{rewardName} {tempReward} -> {reward}", 0, ConsoleColor.DarkBlue);
+                PrintText($"{penaltyName} {tempPenalty} -> {penalty}", 1000, ConsoleColor.DarkBlue);
+            }
+        }
+
+        public bool TryChance(float i)
+        {
+            float randomNum = new Random().Next(0, 100);
+            return randomNum < i;
         }
     }
 
@@ -645,22 +787,109 @@ namespace GameLoop
         {
             name = "여관";
             description = "여관에 들어왔습니다. 휴식을 취하거나 식사를 할 수 있습니다.";
-            engage.AddRange(new List<string> { "휴식 하기(20G)", "식사 하기(50G)" });
+            engage.AddRange(new List<string> { "휴식 하기(500G)", "식사 하기(100G)" });
             connectedScene.AddRange(new List<string> { "마을", "캐릭터 정보창", "아이템창" });
+
+            engage_Method.Add(Engage_Rest);
         }
+
+        public void Engage_Rest(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
+        {
+
+
+            bool yes;
+            YesOrNo("500 골드를 내고 휴식하시겠습니까?", out yes);
+            if (yes)
+            {
+                player.Gold -= 500;
+                player.Health = player.MaxHealth;
+            }
+            //while (!isSuccess)
+            //{
+            //    if (int.TryParse(Console.ReadLine(), out input))
+            //    {
+            //        if (input == 1)
+            //        {
+            //            player.Gold -= 500;
+            //            player.Health = player.MaxHealth;
+            //        }
+            //        else if (input == 2)
+            //        {
+            //            isSuccess = true;
+            //        }
+            //        else
+            //        {
+            //            Console.WriteLine("잘못된 입력입니다");
+            //        }
+            //    }
+            //}
+        }
+
     }
     public class DungeonScene : LocationScene
     {
         public override void ShowName(Scene sceneName)
         {
-            PrintText(sceneName.name, ConsoleColor.Red);
+            PrintText(sceneName.name, 0, ConsoleColor.Red);
+        }
+
+        public override void ShowChoice(Scene sceneName)
+        {
+            int i = 1;
+            while (i - 1 < sceneName.engage.Count)
+            {
+                Console.WriteLine($"{i}. {sceneName.engage[i - 1]}");
+                i++;
+            }
+
+            Console.WriteLine();
+
+            while (i - sceneName.engage.Count - 1 < sceneName.connectedScene.Count)
+            {
+                Console.WriteLine($"{i}. {sceneName.connectedScene[i - sceneName.engage.Count - 1]} (으)로 이동하기");
+                i++;
+            }
+
+            Console.WriteLine();
         }
         public DungeonScene()
         {
             name = "던전";
             description = "이곳은 던전 입구입니다. 조심하세요.";
-            engage.AddRange(new List<string> { "사냥터 입장", "요새 입장", "지옥 입장" });
+            engage.AddRange(new List<string> { "사냥터 입장\t| 권장 방어력 5", "폐허 입장\t| 권장 방어력 11", "미궁 입장\t| 권장 방어력 17" });
             connectedScene.AddRange(new List<string> { "마을", "캐릭터 정보창", "아이템창" });
+
+            engage_Method.Add(Engage_Easy);
+            engage_Method.Add(Engage_Normal);
+            engage_Method.Add(Engage_Hard);
+        }
+
+        public void Engage_Easy(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
+        {
+            bool yes;
+            YesOrNo("사냥터는 쉬운 난이도의 던전입니다. 공략에 도전하시겠습니까?", out yes);
+            if(yes)
+            {
+                SuccessOrNot(player, "사냥터 공략", 5,  player.Gold , ref player.GetgoldRef(),"골드" ,1000, player.Health, ref player.GethealthRef() ,"체력" ,20, player.Attack, player.Defense);
+            }
+        }
+        public void Engage_Normal(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
+        {
+            bool yes;
+            YesOrNo("폐허는 노말 난이도의 던전입니다. 공략에 도전하시겠습니까?", out yes);
+            if (yes)
+            {
+                SuccessOrNot(player, "폐허 공략", 11, player.Gold, ref player.GetgoldRef(), "골드", 1700, player.Health, ref player.GethealthRef(), "체력", 20, player.Attack, player.Defense);
+            }
+        }
+        public void Engage_Hard(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
+        {
+            bool yes;
+            YesOrNo("미궁은 어려운 난이도의 던전입니다. 공략에 도전하시겠습니까?", out yes);
+            if (yes)
+            {
+                SuccessOrNot(player, "미궁 공략", 17, player.Gold, ref player.GetgoldRef(), "골드", 2500, player.Health, ref player.GethealthRef(), "체력", 20, player.Attack, player.Defense);
+            }
         }
     }
 
@@ -674,11 +903,11 @@ namespace GameLoop
             engage.AddRange(new List<string> { "물품 구매", "물품 판매" });
             connectedScene.AddRange(new List<string>() { "마을", "캐릭터 정보창", "아이템창" });
 
-            engageMethod.Add(TradeEngage);
-            engageMethod.Add(TradeEngage);
+            engage_Method.Add(Engage_Trade);
+            engage_Method.Add(Engage_Trade);
         }
 
-        public void TradeEngage(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
+        public void Engage_Trade(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
         {
             bool stopTrading = false;
             List<IItem> seller;
@@ -699,7 +928,7 @@ namespace GameLoop
             while (!stopTrading)
             {
                 Console.WriteLine($"[잔여 골드]");
-                PrintText($"  {player.Gold} \n ", ConsoleColor.Yellow);
+                PrintText($"  {player.Gold} \n ", 0, ConsoleColor.Yellow);
                 Console.WriteLine($"[아이템 목록]");
 
                 ShowSellerItem(seller);
@@ -757,13 +986,12 @@ namespace GameLoop
                             Thread.Sleep(100);
                             if (isBuying == true)
                             {
-                                PrintText($"{tempItemName} 구매에 성공했습니다!", ConsoleColor.DarkGreen);
+                                PrintText($"{tempItemName} 구매에 성공했습니다!", 200, ConsoleColor.DarkGreen);
                             }
                             else
                             {
-                                PrintText($"{tempItemName} 판매에 성공했습니다!", ConsoleColor.DarkGreen);
+                                PrintText($"{tempItemName} 판매에 성공했습니다!", 200, ConsoleColor.DarkGreen);
                             }
-                            Thread.Sleep(200);
 
                             inputSuccess = true;
                         }
@@ -872,13 +1100,13 @@ namespace GameLoop
             engage.AddRange(new List<string> { "장착 관리" });
             connectedScene.AddRange(new List<string> { "돌아가기" });
 
-            engageMethod.Add(ManageEquipAndUse);
+            engage_Method.Add(ManageEquipAndUse);
         }
 
         public void ManageEquipAndUse(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
         {
             bool inputSuccess = false;
-            int inputEngage; 
+            int inputEngage;
 
             while (!inputSuccess)
             {
@@ -894,12 +1122,12 @@ namespace GameLoop
                     }
                     else if (inputEngage < inventory.InventoryItem.Count + 1 && inputEngage > 0)
                     {
-                        if(inventory.InventoryItem[inputEngage - 1] is IEquipment)
+                        if (inventory.InventoryItem[inputEngage - 1] is IEquipment)
                         {
                             IEquipment temp = inventory.InventoryItem[inputEngage - 1] as IEquipment;
-                            temp.EquipOrUnEquip( player, temp,  inventory); //손봐야함
+                            temp.EquipOrUnEquip(player, temp, inventory); //손봐야함
                         }
-                        else if(inventory.InventoryItem[inputEngage - 1] is IPotion)
+                        else if (inventory.InventoryItem[inputEngage - 1] is IPotion)
                         {
                             IPotion temp = inventory.InventoryItem[inputEngage - 1] as IPotion;
                             temp.UseItem(player, temp, inventory);
@@ -917,7 +1145,7 @@ namespace GameLoop
             {
                 if (inventory.EquippedItem.Contains(item))
                 {
-                    PrintText($"[{i + 1}]\t[E]{item.Name}\t|\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t|  가격: {item.Price}골드", ConsoleColor.Green);
+                    PrintText($"[{i + 1}]\t[E]{item.Name}\t|\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t|  가격: {item.Price}골드", 0, ConsoleColor.Green);
                     i++;
                 }
                 else
@@ -947,7 +1175,7 @@ namespace GameLoop
             Console.WriteLine("이름\t {0}", player.Name);
             Console.WriteLine("Lv\t {0}", player.Lv);
             Console.WriteLine("직업\t {0}", player.playerClass.Name);
-            Console.WriteLine("체력\t {0}", player.Health);
+            Console.WriteLine("체력\t {0} / {1}", player.Health, player.MaxHealth);
             Console.WriteLine("공격력\t {0}", player.Attack);
             Console.WriteLine("방어력\t {0}", player.Defense);
             Console.WriteLine("골드\t {0}", player.Gold);
