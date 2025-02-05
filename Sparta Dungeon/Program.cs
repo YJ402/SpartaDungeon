@@ -78,7 +78,7 @@ namespace ItemPlayer
     {
         public float CoreValue => WeaponAttack;
         public string CoreValueName { get { return "공격력"; } }
-        protected abstract int WeaponAttack { get; }
+        public abstract int WeaponAttack { get; }
         public abstract int Price { get; }
         public abstract string Name { get; }
         public abstract string Description { get; }
@@ -116,7 +116,7 @@ namespace ItemPlayer
     public class Old_Sword : Weapon
     {
         public override string Name { get { return "녹슬은 검"; } }
-        protected override int WeaponAttack { get { return 2; } }
+        public override int WeaponAttack { get { return 2; } }
         public override int Price { get { return 100; } }
         public override string Description { get { return "찔리면 파상풍에 걸릴 거 같은 검입니다."; } }
     }
@@ -124,14 +124,14 @@ namespace ItemPlayer
     public class Bronze_Axe : Weapon
     {
         public override string Name { get { return "청동 도끼"; } }
-        protected override int WeaponAttack { get { return 5; } }
+        public override int WeaponAttack { get { return 5; } }
         public override int Price { get { return 1500; } }
         public override string Description { get { return "어디선가 사용됐던거 같은 도끼입니다"; } }
     }
     public class Spartan_Spear : Weapon
     {
         public override string Name { get { return "스파르타의 창"; } }
-        protected override int WeaponAttack { get { return 7; } }
+        public override int WeaponAttack { get { return 7; } }
         public override int Price { get { return 2000; } }
         public override string Description { get { return "스파르타의 전사들이 사용했다는 전설의 창입니다."; } }
     }
@@ -139,7 +139,7 @@ namespace ItemPlayer
     public class Kratos_Sword : Weapon
     {
         public override string Name { get { return "크레토스의 검"; } }
-        protected override int WeaponAttack { get { return 17; } }
+        public override int WeaponAttack { get { return 17; } }
         public override int Price { get { return 15000; } }
         public override string Description { get { return "크레토스가 쓰다버린 검입니다."; } }
     }
@@ -149,7 +149,7 @@ namespace ItemPlayer
     {
         public float CoreValue => ArmorDefense;
         public string CoreValueName { get { return "방어력"; } }
-        protected abstract int ArmorDefense { get; }
+        public abstract int ArmorDefense { get; }
         public abstract int Price { get; }
         public abstract string Name { get; }
         public abstract string Description { get; }
@@ -188,7 +188,7 @@ namespace ItemPlayer
     public class Novice_Armor : Armor
     {
         public override string Name { get { return "수련자의 갑옷"; } }
-        protected override int ArmorDefense { get { return 5; } }
+        public override int ArmorDefense { get { return 5; } }
         public override int Price { get { return 1000; } }
         public override string Description { get { return "수련에 도움을 주는 갑옷입니다."; } }
 
@@ -197,7 +197,7 @@ namespace ItemPlayer
     public class Iron_Armor : Armor
     {
         public override string Name { get { return "무쇠 갑옷"; } }
-        protected override int ArmorDefense { get { return 9; } }
+        public override int ArmorDefense { get { return 9; } }
         public override int Price { get { return 1900; } }
         public override string Description { get { return "무쇠로 만들어져 튼튼한 갑옷입니다."; } }
 
@@ -206,7 +206,7 @@ namespace ItemPlayer
     public class Spartan_Armor : Armor
     {
         public override string Name { get { return "스파르타의 갑옷"; } }
-        protected override int ArmorDefense { get { return 15; } }
+        public override int ArmorDefense { get { return 15; } }
         public override int Price { get { return 3500; } }
         public override string Description { get { return "스파르타의 전사들이 사용했다는 전설의 갑옷입니다."; } }
 
@@ -215,7 +215,7 @@ namespace ItemPlayer
     public class Kratos_Armor : Armor
     {
         public override string Name { get { return "크레토스의 갑옷"; } }
-        protected override int ArmorDefense { get { return 30; } }
+        public override int ArmorDefense { get { return 30; } }
         public override int Price { get { return 10000; } }
         public override string Description { get { return "전쟁의 신이 한번 입고 버린 갑옷입니다."; } }
 
@@ -363,18 +363,6 @@ namespace ItemPlayer
     public class Shop
     {
         public List<IItem> SellingItem = new List<IItem> { };
-        public Action<Player, List<IItem>, IItem> Buying;
-        public Action<Player, List<IItem>, IItem> Selling;
-
-        public void TriggerBuying(Player player, List<IItem> InventoryItem, IItem item)
-        {
-            Buying?.Invoke(player, InventoryItem, item);
-        }
-
-        public void TriggerSelling(Player player, List<IItem> InventoryItem, List<IItem> SellingItem, IItem item)
-        {
-            Selling?.Invoke(player, InventoryItem, item);
-        }
     }
 
 
@@ -615,8 +603,10 @@ namespace GameLoop
             Thread.Sleep(ms);
         }
 
-        public void YesOrNo(string warning, out bool yes)
+        public bool YesOrNo(string warning)
         {
+            bool yes;
+
             Console.WriteLine(warning);
             Console.WriteLine("\n \n 1.네 \n 2.아니오");
 
@@ -641,6 +631,8 @@ namespace GameLoop
                     }
                 }
             }
+
+            return yes;
         }
 
         public void SuccessOrNot(Player player, int Difficulty, string engageName, float minStat1, ref float rewardRef, string rewardName, float rewardDegree, ref float penaltyRef, string penaltyName, float penaltyDegree, float bonusstat, float stat1)
@@ -726,9 +718,7 @@ namespace GameLoop
 
         public void Engage_Digging(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
         {
-            bool yes;
-            YesOrNo("땅을 파보시겠습니까?", out yes);
-            if (yes)
+            if (YesOrNo("땅을 파보시겠습니까?"))
             {
                 SuccessOrNot(player, 1, "땅 파기", 10, ref player.GetgoldRef(), "골드", 10, ref player.GethealthRef(), "체력", 3, player.Attack, player.Attack);
             }
@@ -749,11 +739,7 @@ namespace GameLoop
 
         public void Engage_Rest(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
         {
-
-
-            bool yes;
-            YesOrNo("500 골드를 내고 휴식하시겠습니까?", out yes);
-            if (yes)
+            if (YesOrNo("500 골드를 내고 휴식하시겠습니까?"))
             {
                 player.Gold -= 500;
                 player.Health = player.MaxHealth;
@@ -801,27 +787,21 @@ namespace GameLoop
 
         public void Engage_Easy(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
         {
-            bool yes;
-            YesOrNo("사냥터는 쉬운 난이도의 던전입니다. 공략에 도전하시겠습니까?", out yes);
-            if (yes)
+            if (YesOrNo("사냥터는 쉬운 난이도의 던전입니다. 공략에 도전하시겠습니까?"))
             {
                 SuccessOrNot(player, 20, "사냥터 공략", 5, ref player.GetgoldRef(), "골드", 1000, ref player.GethealthRef(), "체력", 20, player.Attack, player.Defense);
             }
         }
         public void Engage_Normal(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
         {
-            bool yes;
-            YesOrNo("폐허는 노말 난이도의 던전입니다. 공략에 도전하시겠습니까?", out yes);
-            if (yes)
+            if (YesOrNo("폐허는 노말 난이도의 던전입니다. 공략에 도전하시겠습니까?"))
             {
                 SuccessOrNot(player, 40, "폐허 공략", 11, ref player.GetgoldRef(), "골드", 1700, ref player.GethealthRef(), "체력", 20, player.Attack, player.Defense);
             }
         }
         public void Engage_Hard(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
         {
-            bool yes;
-            YesOrNo("미궁은 어려운 난이도의 던전입니다. 공략에 도전하시겠습니까?", out yes);
-            if (yes)
+            if (YesOrNo("미궁은 어려운 난이도의 던전입니다. 공략에 도전하시겠습니까?"))
             {
                 SuccessOrNot(player, 60, "미궁 공략", 17, ref player.GetgoldRef(), "골드", 2500, ref player.GethealthRef(), "체력", 20, player.Attack, player.Defense);
             }
@@ -867,7 +847,7 @@ namespace GameLoop
 
                 ShowSellerItem(seller);
 
-                ShowTrading(player, seller, buyer, ref stopTrading, isBuying);
+                ShowTrading(player, seller, buyer, inventory, ref stopTrading, isBuying);
             }
         }
         public void ShowSellerItem(List<IItem> seller)
@@ -885,7 +865,7 @@ namespace GameLoop
             }
         }
 
-        public void ShowTrading(Player player, List<IItem> seller, List<IItem> buyer, ref bool stopBuying, bool isBuying)
+        public void ShowTrading(Player player, List<IItem> seller, List<IItem> buyer, Inventory inventory, ref bool stopBuying, bool isBuying)
         {
             int input;
             bool inputSuccess = false;
@@ -909,14 +889,34 @@ namespace GameLoop
                             if (isBuying == true)
                             {
                                 player.Gold -= seller[input - 1].Price;
+
                             }
                             else
                             {
                                 player.Gold += seller[input - 1].Price * (float)0.5;
+                                //착용중인 아이템이라면 착용해제하기
+                                if (inventory.EquippedItem.Contains(seller[input - 1]))
+                                {
+                                    if (seller[input - 1] is Weapon)
+                                    {
+                                        Weapon temp = seller[input - 1] as Weapon;
+                                        player.Attack -= temp.WeaponAttack;
+                                        player.equippingSlot.Remove(temp.Name);
+                                        inventory.EquippedItem.Remove(temp);
+                                    }
+                                    else
+                                    {
+                                        Armor temp = seller[input - 1] as Armor;
+                                        player.Defense -= temp.ArmorDefense;
+                                        player.equippingSlot.Remove(temp.Name);
+                                        inventory.EquippedItem.Remove(temp);
+                                    }
+
+                                }
                             }
                             buyer.Add(seller[input - 1]);
                             seller.RemoveAt(input - 1);
-
+                            //
                             Thread.Sleep(100);
                             if (isBuying == true)
                             {
