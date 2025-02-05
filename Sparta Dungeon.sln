@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpartaDungeon(EquipManage)"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EquipPractice", "NotePad\EquipPractice.csproj", "{939937F5-D2DA-40CF-BE66-77734F67BBF0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpartaDungeon(Lv,Item)", "SpartaDungeon(Lv,Item)\SpartaDungeon(Lv,Item).csproj", "{A2A29C5D-B3DB-4399-A360-F5A12B0B2AE5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{939937F5-D2DA-40CF-BE66-77734F67BBF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{939937F5-D2DA-40CF-BE66-77734F67BBF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{939937F5-D2DA-40CF-BE66-77734F67BBF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2A29C5D-B3DB-4399-A360-F5A12B0B2AE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2A29C5D-B3DB-4399-A360-F5A12B0B2AE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2A29C5D-B3DB-4399-A360-F5A12B0B2AE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2A29C5D-B3DB-4399-A360-F5A12B0B2AE5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

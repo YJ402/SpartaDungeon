@@ -6,6 +6,8 @@ using System.Numerics;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System;
+using static System.Net.Mime.MediaTypeNames;
+using System.Drawing;
 
 namespace ItemPlayer
 {
@@ -59,19 +61,22 @@ namespace ItemPlayer
             player.Health += 20;
             inventory.InventoryItem.Remove(item);
         }
-        public void Buyable()
-        {
-            //구매 가능
-        }
+    }
 
-        public void Sellable()
-        {
-            //판매 가능
-        }
+    public class BigHealingPotion : IPotion
+    {
+        public float CoreValue => healAmount;
+        public string CoreValueName { get { return "치유량"; } }
+        float healAmount = 50;
+        public int Price { get { return 200; } }
+        public string Name { get { return "대용량 치유물약"; } }
+        public string Description { get { return "마시면 체력 50이 회복된다."; } }
 
-        public void Drinkable()
+
+        public void UseItem(Player player, IPotion item, Inventory inventory)
         {
-            //마시기 가능
+            player.Health += 20;
+            inventory.InventoryItem.Remove(item);
         }
     }
 
@@ -138,49 +143,35 @@ namespace ItemPlayer
     }
     public class Old_Sword : Weapon
     {
-        public override string Name { get { return "낡은 검"; } }
+        public override string Name { get { return "녹슬은 검"; } }
         protected override int WeaponAttack { get { return 2; } }
         public override int Price { get { return 100; } }
         public override string Description { get { return "찔리면 파상풍에 걸릴 거 같은 검입니다."; } }
-
-        public void Buyable()
-        {
-            //구매 가능
-        }
-
-        public void Sellable()
-        {
-            //판매 가능
-        }
-
-        public void Equippable()
-        {
-            //장착 가능
-        }
     }
 
+    public class Bronze_Axe : Weapon
+    {
+        public override string Name { get { return "청동 도끼"; } }
+        protected override int WeaponAttack { get { return 5; } }
+        public override int Price { get { return 1500; } }
+        public override string Description { get { return "어디선가 사용됐던거 같은 도끼입니다"; } }
+    }
     public class Spartan_Spear : Weapon
     {
         public override string Name { get { return "스파르타의 창"; } }
         protected override int WeaponAttack { get { return 7; } }
         public override int Price { get { return 2000; } }
         public override string Description { get { return "스파르타의 전사들이 사용했다는 전설의 창입니다."; } }
-
-        public void Buyable()
-        {
-            //구매 가능
-        }
-
-        public void Sellable()
-        {
-            //판매 가능
-        }
-
-        public void Equippable()
-        {
-            //장착 가능
-        }
     }
+
+    public class Kratos_Sword : Weapon
+    {
+        public override string Name { get { return "크레토스의 검"; } }
+        protected override int WeaponAttack { get { return 17; } }
+        public override int Price { get { return 15000; } }
+        public override string Description { get { return "크레토스가 쓰다버린 검입니다."; } }
+    }
+
 
     public abstract class Armor : IEquipment
     {
@@ -229,22 +220,35 @@ namespace ItemPlayer
         public override int Price { get { return 1000; } }
         public override string Description { get { return "수련에 도움을 주는 갑옷입니다."; } }
 
-        public void Buyable()
-        {
-            //구매 가능
-        }
 
-        public void Sellable()
-        {
-            //판매 가능
-        }
-
-        public void Equippable()
-        {
-            //장착 가능
-        }
     }
+    public class Iron_Armor : Armor
+    {
+        public override string Name { get { return "무쇠 갑옷"; } }
+        protected override int ArmorDefense { get { return 9; } }
+        public override int Price { get { return 1900; } }
+        public override string Description { get { return "무쇠로 만들어져 튼튼한 갑옷입니다."; } }
 
+
+    }
+    public class Spartan_Armor : Armor
+    {
+        public override string Name { get { return "스파르타의 갑옷"; } }
+        protected override int ArmorDefense { get { return 15; } }
+        public override int Price { get { return 3500; } }
+        public override string Description { get { return "스파르타의 전사들이 사용했다는 전설의 갑옷입니다."; } }
+
+
+    }
+    public class Kratos_Armor : Armor
+    {
+        public override string Name { get { return "크레토스의 갑옷"; } }
+        protected override int ArmorDefense { get { return 30; } }
+        public override int Price { get { return 10000; } }
+        public override string Description { get { return "전쟁의 신이 한번 입고 버린 갑옷입니다."; } }
+
+
+    }
 
     /// <summary>
     /// 생물(플레이어)
@@ -270,7 +274,7 @@ namespace ItemPlayer
         public ClassGroup playerClass;
 
         private bool isDie;
-        public bool IsDie {  get; private set; }
+        public bool IsDie { get; private set; }
 
         private float gold;
         public float Gold
@@ -281,19 +285,32 @@ namespace ItemPlayer
                 gold = value;
             }
         }
+
+        private float xp;
+        
+        public float XP
+        {
+            get { return xp; }
+            set
+            {
+                if (value >= MaxXp)
+                {
+                    LevelUp();
+                }
+                else
+                {
+                    xp = value;
+                }
+            }
+        }
+        private float maxXp = 100;
+        public float MaxXp { get { return maxXp; } set { maxXp = value; } }
+        private int level;
         public int Lv { get; set; }
         private float health;
         public override float Health
         {
-            get {
-                if (health < 0)
-                {
-                    health = 0;
-                    IsDie = true;
-                    return health;
-                }
-                    
-                    return health; }
+            get { return health; }
             set
             {
                 if (value <= 0)
@@ -305,9 +322,9 @@ namespace ItemPlayer
                 {
                     health = MaxHealth;
                 }
-                else 
+                else
                 {
-                    health = value;  
+                    health = value;
                 }
             }
         }
@@ -329,6 +346,21 @@ namespace ItemPlayer
             Name = name;
         }
 
+        public void LevelUp()
+        {
+            XP = 0;
+            Lv += 1;
+            Attack += 1;
+            Defense += 1;
+
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("레벨 업! {0} -> {1}", Lv - 1, Lv);
+            Console.ResetColor();
+            Thread.Sleep(2000);
+            MaxXp = Lv * (float)(100 * 0.5) + 50; ;
+        }
+
         public ref float GethealthRef()
         {
             return ref health;
@@ -337,6 +369,16 @@ namespace ItemPlayer
         public ref float GetgoldRef()
         {
             return ref gold;
+        }
+
+        public void ReadSelf()
+        {
+            Gold += 0;
+            Defense += 0;
+            Attack += 0;
+            Health += 0;
+            Lv += 0;
+            // Exp += 0;
         }
     }
 
@@ -503,11 +545,18 @@ namespace GameLoop
             //shop.Selling += inventory.SellToShop;
 
             Novice_Armor novice_armor = new Novice_Armor();
-            Spartan_Spear spartan_Spear = new Spartan_Spear();
-            HealingPotion healingPotion = new HealingPotion();
+            Iron_Armor iron_Armor = new Iron_Armor();
+            Spartan_Armor spartan_Armor = new Spartan_Armor();
+            Kratos_Armor kratos_Armor = new Kratos_Armor();
             Old_Sword old_Sword = new Old_Sword();
+            Bronze_Axe bronze_Axe = new Bronze_Axe();
+            Spartan_Spear spartan_Spear = new Spartan_Spear();
+            Kratos_Sword kratos_Sword = new Kratos_Sword();
+            HealingPotion healingPotion = new HealingPotion();
+            BigHealingPotion bigHealingPotion = new BigHealingPotion();
 
-            shop.SellingItem.AddRange(new List<IItem> { novice_armor, spartan_Spear, healingPotion, old_Sword });
+
+            shop.SellingItem.AddRange(new List<IItem> { novice_armor, iron_Armor, spartan_Spear, kratos_Armor, old_Sword, bronze_Axe, spartan_Spear, kratos_Sword, healingPotion, bigHealingPotion });
             //샵 구매 디버깅
             // shop.TriggerBuying(player, inventory.InventoryItem, novice_armor);
 
@@ -563,8 +612,11 @@ namespace GameLoop
                 }
 
                 if (player.IsDie == true)
+                {
                     isRunning = false;
-                
+                    currentScene.PrintText("당신은 사망하였습니다.", 5000, ConsoleColor.Red);
+                }
+
             }
         }
     }
@@ -707,14 +759,14 @@ namespace GameLoop
             }
         }
 
-        public void SuccessOrNot(Player player, string engageName, float minStat1, float reward, ref float rewardRef, string rewardName, float rewardDegree, float penalty, ref float penaltyRef, string penaltyName, float penaltyDegree, float bonusstat, float stat1)
+        public void SuccessOrNot(Player player, int Difficulty, string engageName, float minStat1, ref float rewardRef, string rewardName, float rewardDegree, ref float penaltyRef, string penaltyName, float penaltyDegree, float bonusstat, float stat1)
         {
             //보너스 스탯
             int tempBonusstat = (int)bonusstat;
 
             //원래의 보상, 페널티 스텟 저장
-            float tempReward = reward;
-            float tempPenalty = penalty;
+            float tempReward = rewardRef;
+            float tempPenalty = penaltyRef;
 
             //보너스 스텟에 따른 랜덤값
             int randNum1 = new Random().Next(tempBonusstat, tempBonusstat * 2);
@@ -724,19 +776,25 @@ namespace GameLoop
             int randNum2 = new Random().Next((int)(penaltyDegree), (int)(penaltyDegree * 1.75));
 
             //페널티 정도에 따른 실패시의 랜덤값
-            int randNum3 = new Random().Next((int)(penaltyDegree*1.25), (int)(penaltyDegree * 2));
+            int randNum3 = new Random().Next((int)(penaltyDegree * 1.25), (int)(penaltyDegree * 2));
 
 
 
             if (stat1 >= minStat1 || TryChance(100 + (stat1 - minStat1) / minStat1 * 100 - 30))
             {
                 //보상 결정, 프로퍼티 로직 사용할 수 있게.
-                reward += rewardDegree * (1 + randNum1 / 100);
-                rewardRef = reward;
+                rewardRef += rewardDegree * (1 + randNum1 / 100);
 
-                //페널티 결정, 프로퍼티 로직 사용할 수 있게.
-                penalty -= randNum2 - stat1 + minStat1;
-                penaltyRef = penalty;
+                //페널티 결정.
+                if (randNum2 - stat1 + minStat1 > 0)
+                    penaltyRef -= randNum2 - stat1 + minStat1;
+
+                //경험치 상승
+                player.XP += 1 * Difficulty;
+
+                //셀프 리딩
+                player.ReadSelf();
+
                 PrintText($"{engageName}에 성공했습니다!", 300, ConsoleColor.Blue);
                 PrintText("[탐험 결과]", 200, ConsoleColor.DarkBlue);
                 PrintText($"{rewardName} {tempReward} -> {rewardRef}", 0, ConsoleColor.DarkBlue);
@@ -744,14 +802,17 @@ namespace GameLoop
             }
             else
             {
-                //페널티 결정, 프로퍼티 로직 사용할 수 있게.
-                penalty -= randNum3 - stat1 + minStat1;
-                penaltyRef = penalty;
+
+                //페널티 결정
+                if (randNum3 - stat1 + minStat1 > 0)
+                    penaltyRef -= randNum3 - stat1 + minStat1;
+
+                player.ReadSelf();
 
                 PrintText($"{engageName}에 실패했습니다!", 300, ConsoleColor.Red);
                 PrintText("[탐험 결과]", 200, ConsoleColor.DarkRed);
-                PrintText($"{rewardName} {tempReward} -> {reward}", 0, ConsoleColor.DarkRed);
-                PrintText($"{penaltyName} {tempPenalty} -> {penalty}", 1000, ConsoleColor.DarkRed);
+                PrintText($"{rewardName} {tempReward} -> {rewardRef}", 0, ConsoleColor.DarkRed);
+                PrintText($"{penaltyName} {tempPenalty} -> {penaltyRef}", 1000, ConsoleColor.DarkRed);
             }
         }
 
@@ -775,9 +836,21 @@ namespace GameLoop
         public TownScene()
         {
             name = "마을";
-            description = "이곳은 마을입니다. 무기를 정비하고 휴식을 취할 수 있습니다.";
-            engage.AddRange(new List<string> { "하늘 보기", "마을 순찰" });
+            description = "이곳은 마을입니다. 상점에서 거래를 하거나 여관에서 휴식을 취할 수 있습니다.";
+            engage.AddRange(new List<string> { "땅 파기" });
             connectedScene.AddRange(new List<string> { "여관", "상점", "던전", "캐릭터 정보창", "아이템창" });
+
+            engage_Method.Add(Engage_Digging);
+        }
+
+        public void Engage_Digging(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
+        {
+            bool yes;
+            YesOrNo("땅을 파보시겠습니까?", out yes);
+            if (yes)
+            {
+                SuccessOrNot(player, 1, "땅 파기", 10, ref player.GetgoldRef(), "골드", 10, ref player.GethealthRef(), "체력", 3, player.Attack, player.Attack);
+            }
         }
     }
 
@@ -868,9 +941,9 @@ namespace GameLoop
         {
             bool yes;
             YesOrNo("사냥터는 쉬운 난이도의 던전입니다. 공략에 도전하시겠습니까?", out yes);
-            if(yes)
+            if (yes)
             {
-                SuccessOrNot(player, "사냥터 공략", 5,  player.Gold , ref player.GetgoldRef(),"골드" ,1000, player.Health, ref player.GethealthRef() ,"체력" ,20, player.Attack, player.Defense);
+                SuccessOrNot(player, 20, "사냥터 공략", 5, ref player.GetgoldRef(), "골드", 1000, ref player.GethealthRef(), "체력", 20, player.Attack, player.Defense);
             }
         }
         public void Engage_Normal(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
@@ -879,7 +952,7 @@ namespace GameLoop
             YesOrNo("폐허는 노말 난이도의 던전입니다. 공략에 도전하시겠습니까?", out yes);
             if (yes)
             {
-                SuccessOrNot(player, "폐허 공략", 11, player.Gold, ref player.GetgoldRef(), "골드", 1700, player.Health, ref player.GethealthRef(), "체력", 20, player.Attack, player.Defense);
+                SuccessOrNot(player, 40, "폐허 공략", 11, ref player.GetgoldRef(), "골드", 1700, ref player.GethealthRef(), "체력", 20, player.Attack, player.Defense);
             }
         }
         public void Engage_Hard(Player player, Scene sceneName, Shop shop, Inventory inventory, int input)
@@ -888,7 +961,7 @@ namespace GameLoop
             YesOrNo("미궁은 어려운 난이도의 던전입니다. 공략에 도전하시겠습니까?", out yes);
             if (yes)
             {
-                SuccessOrNot(player, "미궁 공략", 17, player.Gold, ref player.GetgoldRef(), "골드", 2500, player.Health, ref player.GethealthRef(), "체력", 20, player.Attack, player.Defense);
+                SuccessOrNot(player, 60, "미궁 공략", 17, ref player.GetgoldRef(), "골드", 2500, ref player.GethealthRef(), "체력", 20, player.Attack, player.Defense);
             }
         }
     }
@@ -943,7 +1016,7 @@ namespace GameLoop
                 Console.WriteLine();
                 foreach (IItem item in seller)
                 {
-                    Console.WriteLine($"- [{i}] \t {item.Name}\t |\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t \t|  가격: {item.Price}골드");
+                    Console.WriteLine($"-[{i}]\t{item.Name}\t|\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t \t|  가격: {item.Price}골드");
                     i++;
                 }
                 Console.WriteLine($"\n{i} 돌아가기");
@@ -1174,6 +1247,7 @@ namespace GameLoop
         {
             Console.WriteLine("이름\t {0}", player.Name);
             Console.WriteLine("Lv\t {0}", player.Lv);
+            Console.WriteLine("경험치\t {0} / {1}", player.XP, player.MaxXp);
             Console.WriteLine("직업\t {0}", player.playerClass.Name);
             Console.WriteLine("체력\t {0} / {1}", player.Health, player.MaxHealth);
             Console.WriteLine("공격력\t {0}", player.Attack);
