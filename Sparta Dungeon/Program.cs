@@ -28,17 +28,6 @@ namespace ItemPlayer
         int Price { get; }
         string Name { get; }
         string Description { get; }
-        public void Buyable()
-        {
-            //구매 가능
-        }
-
-        public void Sellable()
-        {
-            //판매 가능
-        }
-
-
     }
 
     public interface IPotion : IItem
@@ -122,24 +111,7 @@ namespace ItemPlayer
                 inventory.EquippedItem.Remove(item);
             }
         }
-        //public void UnEquip(Player player)
-        //{
-        //    if (!player.equippingSlot.ContainsValue(Slot))
-        //    {
-        //        player.Attack += WeaponAttack;
-        //        player.equippingSlot.Add(item.Name, Slot);
-        //    }
-        //    else
-        //    {
-        //        Console.WriteLine("이미 착용한 부위입니다");
-        //    }
-        //    player.Attack -= WeaponAttack;
-        //}
 
-        public void Attackable()
-        {
-            //공격 가능
-        }
     }
     public class Old_Sword : Weapon
     {
@@ -269,8 +241,6 @@ namespace ItemPlayer
 
     public class Player : Creature
     {
-        // public static Player player; // 왜 선언한 거지?
-
         public ClassGroup playerClass;
 
         private bool isDie;
@@ -378,7 +348,7 @@ namespace ItemPlayer
             Attack += 0;
             Health += 0;
             Lv += 0;
-            // Exp += 0;
+            xp += 0;
         }
     }
 
@@ -388,59 +358,6 @@ namespace ItemPlayer
         public List<IEquipment> EquippedItem = new List<IEquipment> { }; ///////// EquipSlot이랑 통합할 수도 있을까?
 
         Shop shop = new Shop();
-
-        //// 아이템관리 //
-        //public void EquipItem(List<IItem> InventoryItem, List<IEquipment> EquippedItem, IEquipment item)
-        //{
-        //    AddToEquippedItem(EquippedItem, item);
-        //}
-
-        //public void UnEquipItemp(List<IItem> InventoryItem, List<IEquipment> EquippedItem, IEquipment item)
-        //{
-        //    RemoveFromEquippedItem(EquippedItem, item);
-        //}
-
-        //public void UseItem(List<IItem> InventoryItem, IItem item)
-        //{
-        //    RemoveFromInventoryItem(InventoryItem, item);
-        //}
-
-        //// 상점 //
-        //public void BuyFromShop(Player player, List<IItem> InventoryItem, IItem item)
-        //{
-        //    AddToInventoryItem(InventoryItem, item);
-        //    player.Gold -= item.Price;
-        //}
-
-        //public void SellToShop(Player player, List<IItem> InventoryItem, IItem item)
-        //{
-        //    RemoveFromInventoryItem(InventoryItem, item);
-        //    player.Gold += item.Price * (float)0.5;
-        //}
-
-        //// 조합 메서드 //
-
-        //public void RemoveFromInventoryItem(List<IItem> InventoryItem, IItem item)
-        //{
-        //    InventoryItem.Remove(item);
-        //}
-
-        //public void RemoveFromEquippedItem(List<IEquipment> EquippedItem, IEquipment item)
-        //{
-        //    EquippedItem.Remove(item);
-        //}
-
-        //public void AddToInventoryItem(List<IItem> InventoryItem, IItem item)
-        //{
-        //    InventoryItem.Add(item);
-        //}
-
-        //public void AddToEquippedItem(List<IEquipment> EquippedItem, IEquipment item)
-        //{
-        //    EquippedItem.Add(item);
-        //}
-
-
     }
 
     public class Shop
@@ -536,13 +453,6 @@ namespace GameLoop
             Player player = new Player(1, "Rtani", classGroup);
             Inventory inventory = new Inventory();
             player.Gold += 100000;
-            //SM.EnterScene += currentScene.ShowDescription;
-            //SM.EnterScene += currentScene.ShowChoice;
-
-            //SM.EnterCharacterUIScene += currentScene.ShowInfo;
-
-            //shop.Buying += inventory.BuyFromShop;
-            //shop.Selling += inventory.SellToShop;
 
             Novice_Armor novice_armor = new Novice_Armor();
             Iron_Armor iron_Armor = new Iron_Armor();
@@ -555,15 +465,7 @@ namespace GameLoop
             HealingPotion healingPotion = new HealingPotion();
             BigHealingPotion bigHealingPotion = new BigHealingPotion();
 
-
             shop.SellingItem.AddRange(new List<IItem> { novice_armor, iron_Armor, spartan_Spear, kratos_Armor, old_Sword, bronze_Axe, spartan_Spear, kratos_Sword, healingPotion, bigHealingPotion });
-            //샵 구매 디버깅
-            // shop.TriggerBuying(player, inventory.InventoryItem, novice_armor);
-
-            //착용하기, 이미 착용 문구 보기, 착용 해제하기 테스팅 
-            //spartan_Spear.EquipOrUnEquip(player, spartan_Spear, inventory);
-            //old_Sword.EquipOrUnEquip(player, old_Sword, inventory);
-            //spartan_Spear.EquipOrUnEquip(player, spartan_Spear, inventory);
 
             while (isRunning)
             {
@@ -598,17 +500,9 @@ namespace GameLoop
                 }
                 else
                 {
-                    //bool engageQuit = false;
-                    //int newInput;
-                    //while (!engageQuit)
-                    //{
                     // 행동 선택지를 고른 경우
                     currentScene.engage_Method[input - 1](player, currentScene, shop, inventory, input);
 
-                    //if (int.TryParse(Console.ReadLine(), out newInput))
-                    //{
-                    //}
-                    //}
                 }
 
                 if (player.IsDie == true)
@@ -672,14 +566,6 @@ namespace GameLoop
                 i.ShowInfo(player); // 이렇게 하면 됨.
             }
             i.ShowChoice(i);
-
-            // 이벤트는 virtual 오버라이드가 안되네
-            //if (i is UIScene)
-            //{
-            //    EnterCharacterUIScene?.Invoke(player); 
-            //}
-            //EnterScene?.Invoke(i); 
-
         }
     }
 
@@ -697,8 +583,6 @@ namespace GameLoop
         public void ShowDescription(Scene sceneName)
         {
             Console.WriteLine(sceneName.description + "\n");
-
-            ///// 여기서 description이 직전에 했던 것으로 고정되는 문제가 있음. 처음 생성된 Scene 클래스의 객체가 할당한 값으로 고정돼버림. 이유는 몰라.
         }
 
         public virtual void ShowChoice(Scene sceneName)
@@ -828,11 +712,8 @@ namespace GameLoop
 
     }
 
-
-
     public class TownScene : LocationScene
     {
-        //////////////////생성자로 부모 클래스가 생성한 Engage,ConnectScene, description 필드의 값을 새로이 할당/////////////////
         public TownScene()
         {
             name = "마을";
@@ -859,8 +740,8 @@ namespace GameLoop
         public RestScene()
         {
             name = "여관";
-            description = "여관에 들어왔습니다. 휴식을 취하거나 식사를 할 수 있습니다.";
-            engage.AddRange(new List<string> { "휴식 하기(500G)", "식사 하기(100G)" });
+            description = "여관에 들어왔습니다. 휴식을 취할 수 있습니다.";
+            engage.AddRange(new List<string> { "휴식 하기(500G)" });
             connectedScene.AddRange(new List<string> { "마을", "캐릭터 정보창", "아이템창" });
 
             engage_Method.Add(Engage_Rest);
@@ -877,25 +758,6 @@ namespace GameLoop
                 player.Gold -= 500;
                 player.Health = player.MaxHealth;
             }
-            //while (!isSuccess)
-            //{
-            //    if (int.TryParse(Console.ReadLine(), out input))
-            //    {
-            //        if (input == 1)
-            //        {
-            //            player.Gold -= 500;
-            //            player.Health = player.MaxHealth;
-            //        }
-            //        else if (input == 2)
-            //        {
-            //            isSuccess = true;
-            //        }
-            //        else
-            //        {
-            //            Console.WriteLine("잘못된 입력입니다");
-            //        }
-            //    }
-            //}
         }
 
     }
@@ -968,7 +830,6 @@ namespace GameLoop
 
     public class ShopScene : LocationScene
     {
-        //Shop shop = new Shop(); // 없어도 될듯?
         public ShopScene()
         {
             name = "상점";
@@ -1077,64 +938,6 @@ namespace GameLoop
                 }
             }
         }
-        //public void SellingEngage(Player player, Scene sceneName, Shop shop, Inventory inventory)
-        //{
-        //    bool stopSelling = false;
-
-        //    while (!stopSelling)
-        //    {
-        //        ShowInventoryItem(inventory);
-        //        ShowSelling(player, shop, inventory, ref stopSelling);
-        //    }
-        //}
-        //public void ShowInventoryItem(Inventory inventory)
-        //{
-        //    {
-        //        int i = 1;
-        //        Console.WriteLine();
-        //        foreach (IItem item in inventory.InventoryItem)
-        //        {
-        //            Console.WriteLine($"- [{i}] \t {item.Name}\t|\t{item.CoreValueName} +{item.CoreValue}\t|\t{item.Description}\t \t|  가격: {item.Price * 0.5}골드");
-        //            i++;
-        //        }
-        //        Console.WriteLine($"\n{i} 돌아가기");
-        //        Console.WriteLine();
-        //    }
-        //}
-        //public void ShowSelling(Player player, Shop shop, Inventory inventory, ref bool stopSelling)
-        //{
-        //    int input;
-        //    bool inputSuccess = false;
-
-        //    while (!inputSuccess)
-        //    {
-        //        if (int.TryParse(Console.ReadLine(), out input))
-        //        {
-        //            if (input == inventory.InventoryItem.Count + 1)
-        //            {
-        //                //돌아가기
-        //                inputSuccess = true;
-        //                stopSelling = true;
-        //                break;
-        //            }
-        //            else if (input < inventory.InventoryItem.Count + 1 && input > 0)
-        //            {
-        //                string tempItemName = inventory.InventoryItem[input - 1].ToString();
-        //                player.Gold += inventory.InventoryItem[input - 1].Price;
-        //                shop.SellingItem.Add(inventory.InventoryItem[input - 1]);
-        //                inventory.InventoryItem.RemoveAt(input - 1);
-
-        //                Thread.Sleep(10);
-        //                PrintText($"{tempItemName} 판매에 성공했습니다!", ConsoleColor.Green);
-        //                Thread.Sleep(100);
-
-        //                inputSuccess = true;
-
-
-        //            }
-        //        }
-        //    }
-        //}
     }
 
     public class UIScene : Scene
@@ -1198,7 +1001,7 @@ namespace GameLoop
                         if (inventory.InventoryItem[inputEngage - 1] is IEquipment)
                         {
                             IEquipment temp = inventory.InventoryItem[inputEngage - 1] as IEquipment;
-                            temp.EquipOrUnEquip(player, temp, inventory); //손봐야함
+                            temp.EquipOrUnEquip(player, temp, inventory);
                         }
                         else if (inventory.InventoryItem[inputEngage - 1] is IPotion)
                         {
@@ -1267,48 +1070,6 @@ namespace GameLoop
         {
             GameManager instance = GameManager.GetInstance();
             instance.GameStart();
-            //
-
-            //SceneManager SM = new SceneManager();
-
-            //Scene currentScene = new DungeonScene();
-
-            //SM.EnterScene += currentScene.ShowDescription;
-            //SM.EnterScene += currentScene.ShowChoice;
-
-            //bool gameQuit = false;
-
-
-
-            ////게임 루프
-            //while (!gameQuit || isRunning)
-            //{
-
-            //    //씬 소개 및 선택지 출력 단계
-            //    SM.TriggerEnterScene(currentScene);
-
-            //    //선택 단계
-            //    bool inputSuccess = false;
-            //    int input = 0;
-
-            //    while (!inputSuccess)
-            //    {
-            //        Console.Write("행동을 선택해주세요: ");
-            //        //씬 선택지 입력, //입력을 씬 매개변수에 입력.
-            //        inputSuccess = int.TryParse(Console.ReadLine(), out input);
-            //        inputSuccess = input > 0;
-            //        if (!inputSuccess)
-            //        {
-            //            Console.Write("올바른 입력해주세요!");
-            //            Console.WriteLine("");
-            //        }
-            //    }
-            //    inputSuccess = false;
-
-            //    //씬 이동
-            //    int inputNum = input - currentScene.engage.Count;
-            //    SM.ChangeCurrentScene(currentScene.connectedScene[inputNum - 1], ref currentScene);
-            //}
         }
     }
 }

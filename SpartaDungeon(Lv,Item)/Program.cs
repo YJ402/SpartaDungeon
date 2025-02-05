@@ -859,8 +859,8 @@ namespace GameLoop
         public RestScene()
         {
             name = "여관";
-            description = "여관에 들어왔습니다. 휴식을 취하거나 식사를 할 수 있습니다.";
-            engage.AddRange(new List<string> { "휴식 하기(500G)", "식사 하기(100G)" });
+            description = "여관에 들어왔습니다. 휴식을 취할 수 있습니다.";
+            engage.AddRange(new List<string> { "휴식 하기(500G)" });
             connectedScene.AddRange(new List<string> { "마을", "캐릭터 정보창", "아이템창" });
 
             engage_Method.Add(Engage_Rest);
@@ -1267,48 +1267,6 @@ namespace GameLoop
         {
             GameManager instance = GameManager.GetInstance();
             instance.GameStart();
-            //
-
-            //SceneManager SM = new SceneManager();
-
-            //Scene currentScene = new DungeonScene();
-
-            //SM.EnterScene += currentScene.ShowDescription;
-            //SM.EnterScene += currentScene.ShowChoice;
-
-            //bool gameQuit = false;
-
-
-
-            ////게임 루프
-            //while (!gameQuit || isRunning)
-            //{
-
-            //    //씬 소개 및 선택지 출력 단계
-            //    SM.TriggerEnterScene(currentScene);
-
-            //    //선택 단계
-            //    bool inputSuccess = false;
-            //    int input = 0;
-
-            //    while (!inputSuccess)
-            //    {
-            //        Console.Write("행동을 선택해주세요: ");
-            //        //씬 선택지 입력, //입력을 씬 매개변수에 입력.
-            //        inputSuccess = int.TryParse(Console.ReadLine(), out input);
-            //        inputSuccess = input > 0;
-            //        if (!inputSuccess)
-            //        {
-            //            Console.Write("올바른 입력해주세요!");
-            //            Console.WriteLine("");
-            //        }
-            //    }
-            //    inputSuccess = false;
-
-            //    //씬 이동
-            //    int inputNum = input - currentScene.engage.Count;
-            //    SM.ChangeCurrentScene(currentScene.connectedScene[inputNum - 1], ref currentScene);
-            //}
         }
     }
 }
